@@ -45,7 +45,7 @@ export class Skeleton {
   public update() {
     // Calculate bones with hierarchy
     for (let i = 0; i < this.boneHierarchy.length; i++) {
-      this.boneHierarchy[i].update(new Matrix4x4().identity());
+      this.boneHierarchy[i].update(Matrix4x4.identity());
     }
   }
 }

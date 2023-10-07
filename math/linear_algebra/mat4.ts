@@ -10,7 +10,7 @@ export class Matrix4x4 {
     else this.raw = new Float32Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
   }
 
-  public identity(): Matrix4x4 {
+  public static identity(): Matrix4x4 {
     return new Matrix4x4(new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]));
   }
 

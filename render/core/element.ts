@@ -6,6 +6,7 @@ type ITextureOptions = {
   type: string;
   width: number;
   height: number;
+  useMapMaps: boolean;
 
   // Non set
   internalFormat: number;
@@ -62,6 +63,8 @@ export class RenderElement {
     options.type = options.type || 'rgba8';
     options.filtration = options.filtration || 'linear';
     options.wrap = options.wrap || 'clamp';
+    options.useMapMaps = options.useMapMaps ?? false;
+    this.textureOptions[name] = options as ITextureOptions;
 
     switch (options.type) {
       case 'r32f':
@@ -120,7 +123,7 @@ export class RenderElement {
     this.setTextureFiltration(name, options.filtration);
     this.setTextureWrap(name, options.wrap);
 
-    // Save options
+    // Update options
     options.internalFormat = internalFormat;
     options.srcFormat = srcFormat;
     options.srcType = srcType;
@@ -203,7 +206,12 @@ export class RenderElement {
       image.onload = () => {
         gl.bindTexture(gl.TEXTURE_2D, this.getTexture(name));
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        const options = this.getTextureOptions(name);
+        if (options.useMapMaps) {
+          gl.generateMipmap(gl.TEXTURE_2D);
+        }
         gl.bindTexture(gl.TEXTURE_2D, null);
+        // this.setTextureFiltration(name, options.filtration);
       };
     }
 
@@ -258,14 +266,20 @@ export class RenderElement {
   public setTextureFiltration(name: string, type: string) {
     const gl = this.gl;
     gl.bindTexture(gl.TEXTURE_2D, this.getTexture(name));
+    const options = this.getTextureOptions(name);
 
     if (type === 'nearest') {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     }
     if (type === 'linear') {
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      if (options.useMapMaps) {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      } else {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      }
     }
 
     // Unbind

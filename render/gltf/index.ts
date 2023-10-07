@@ -18,10 +18,12 @@ export class GLTF {
   textures: GLTF_Texture[] = [];
   animations: GLTF_Animation[] = [];
 
-  async fromURL(url: string) {
-    this.baseURL = url.split('/').slice(0, -1).join('/') + '/';
+  static async fromURL(url: string): Promise<GLTF> {
+    const model = new GLTF();
+    model.baseURL = url.split('/').slice(0, -1).join('/') + '/';
     const text = await (await fetch(url)).text();
-    await this.fromJSON(text);
+    await model.fromJSON(text);
+    return model;
   }
 
   async fromJSON(str: string) {

@@ -141,3 +141,87 @@ void main()
     color = vec4(texelColor.rgb * lighting.rgb, 1.0);
 }
 `;
+
+// language=GLSL
+export const staticMeshShaderText = `#version 300 es
+precision highp float;
+precision highp int;
+precision highp usampler2D;
+precision highp sampler2D;
+
+in vec3 aPosition;
+in vec3 aTangent;
+in vec3 aBiTangent;
+in vec3 aNormal;
+in vec2 aUV;
+
+uniform mat4 uProjectionMatrix;
+uniform mat4 uViewMatrix;
+
+out vec3 vPosition;
+out mat3 vTBN;
+out vec2 vUV;
+
+mat4 identity() {
+   return mat4(
+       1.0, 0.0, 0.0, 0.0,
+       0.0, 1.0, 0.0, 0.0,
+       0.0, 0.0, 1.0, 0.0,
+       0.0, 0.0, 0.0, 1.0
+   );
+}
+
+void main() {
+    gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition.xyz, 1.0);
+    vPosition = (vec4(aPosition.xyz, 1.0)).xyz;
+    vUV = aUV;
+    
+    // TBN Matrix
+    mat4 modelMatrix = identity();
+    vec3 T = normalize(vec3(modelMatrix * vec4(aTangent,   1.0)));
+    vec3 B = normalize(vec3(modelMatrix * vec4(aBiTangent, 1.0)));
+    vec3 N = normalize(vec3(modelMatrix * vec4(aNormal,    1.0)));
+    vTBN = mat3(T, B, N);
+}
+
+// Fragment
+#version 300 es
+precision highp float;
+precision highp int;
+precision highp usampler2D;
+precision highp sampler2D;
+
+in vec3 vPosition;
+in vec2 vUV;
+in mat3 vTBN;
+
+out vec4 color;
+                                     
+uniform sampler2D uTextureColor;
+uniform sampler2D uTextureNormal;
+
+void main()
+{
+    // if (int(gl_FragCoord.y) % 2 == 0) discard;
+    
+    // Считываем нормали из normal map
+    vec3 normal = texture(uTextureNormal, vUV).xyz * 2.0 - 1.0;
+    normal = normalize(vTBN * normal);
+    
+    // Const
+    vec3 vLightDirection = normalize(vec3(0.0, 1.0, 1.0));
+    vec3 vAmbientColor = vec3(0.3, 0.3, 0.3);
+    vec3 directionalLightColor = vec3(1.0, 1.0, 1.0);
+    
+    // Light
+    float lightDot = dot(normalize(normal.xyz), normalize(vLightDirection));
+    float lightPower = max(lightDot, 0.0);
+    if (lightDot < 0.0) {
+        vAmbientColor = mix(vAmbientColor, vec3(0.0, 0.0, 0.0), -lightDot);
+    }
+    
+    vec4 texelColor = texture(uTextureColor, vUV);
+    vec3 lighting = vAmbientColor + (directionalLightColor * lightPower);
+    color = vec4(texelColor.rgb * lighting.rgb, 1.0);
+}
+`;

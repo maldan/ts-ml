@@ -35,7 +35,7 @@ export class Bone {
   }
 
   public update(parent: Matrix4x4) {
-    let mx = new Matrix4x4().identity();
+    let mx = Matrix4x4.identity();
     mx = mx.translate(this.position);
     mx = mx.rotateQuaternion(this.rotation.mul(this.localRotation));
     this.matrix = parent.multiply(mx);

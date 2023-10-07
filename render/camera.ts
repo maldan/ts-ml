@@ -35,7 +35,7 @@ export class PerspectiveCamera {
 
   public offsetPosition(dir: Vector3) {
     let hh = this.rotation.invert();
-    let head = new Matrix4x4().identity().rotateQuaternion(hh);
+    let head = Matrix4x4.identity().rotateQuaternion(hh);
 
     let dirNew = dir.toVector4(1.0).multiplyMatrix(head);
     this.position.add_(dirNew.toVector3());
@@ -50,8 +50,7 @@ export class PerspectiveCamera {
     if (this.isInversePositionZ) position.z *= -1;
 
     // Position
-    this.viewMatrix = this.viewMatrix
-      .identity()
+    this.viewMatrix = Matrix4x4.identity()
       .rotateQuaternion(this.rotation)
       .translate(position)
       .scale(this.scale);

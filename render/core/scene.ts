@@ -8,6 +8,9 @@ import { RenderElement } from './element';
 import { Skeleton } from '../skeleton/skeleton';
 import { SkinnedElement, SkinnedMeshLayer } from './layer/mesh/skinnedLayer';
 import { SkinnedMesh } from '../primitive/skinnedMesh';
+import { Mesh } from '../primitive/mesh';
+import { StaticElement, StaticMeshLayer } from './layer/mesh/staticLayer';
+import { GLTF_Animation } from '../gltf/animation';
 
 export class Scene extends RenderElement {
   public _render: Render;
@@ -15,7 +18,9 @@ export class Scene extends RenderElement {
   public layer!: {
     line: LineLayer;
     skinnedMesh: SkinnedMeshLayer;
+    staticMesh: StaticMeshLayer;
   };
+  public animationList: GLTF_Animation[] = [];
 
   constructor(render: Render) {
     super(render.gl);
@@ -33,19 +38,23 @@ export class Scene extends RenderElement {
     this.layer = {
       line: new LineLayer(this),
       skinnedMesh: new SkinnedMeshLayer(this),
+      staticMesh: new StaticMeshLayer(this),
     };
   }
 
   public update(delta: number) {
     this.camera.calculateProjection();
     this.camera.calculateView();
-
+    this.animationList.forEach((x) => {
+      x.tick(delta);
+    });
     this.layer.skinnedMesh.update(delta);
   }
 
   public render(eye: IEye = '') {
     this.layer.line.render(eye);
     this.layer.skinnedMesh.render(eye);
+    this.layer.staticMesh.render(eye);
   }
 
   public addGLTF(scene: GLTF) {
@@ -56,12 +65,12 @@ export class Scene extends RenderElement {
     if (scene.textures) {
       for (let i = 0; i < scene.textures.length; i++) {
         const name = `${id}_${scene.textures[i].source}`;
-        this.createTexture(name, {});
+        this.createTexture(name, { filtration: 'linear', useMapMaps: true });
         this.uploadImageInTexture(name, scene.textures[i].image.image);
       }
     } else {
       const name = `${id}_0`;
-      this.createTexture(name, {});
+      this.createTexture(name, { filtration: 'linear', useMapMaps: true });
     }
 
     // Parse skins
@@ -94,5 +103,33 @@ export class Scene extends RenderElement {
         });
       }
     }
+
+    // Parse static
+    for (let i = 0; i < scene.nodes.length; i++) {
+      if (scene.nodes[i].skinId === -1 && scene.nodes[i].meshId >= 0) {
+        const mesh = scene.meshes[scene.nodes[i].meshId];
+        mesh.primitives.forEach((primitive) => {
+          const staticMesh = new Mesh();
+          staticMesh.set(primitive);
+
+          // Create render element
+          const element = new StaticElement(gl, staticMesh);
+
+          // Assign textures
+          try {
+            element.textureMap['uTextureColor'] =
+              this.textureMap[`${id}_${primitive.material.textureColorId}`];
+          } catch {}
+          try {
+            element.textureMap['uTextureNormal'] =
+              this.textureMap[`${id}_${primitive.material.textureNormalId}`];
+          } catch {}
+
+          this.layer.staticMesh.add(element);
+        });
+      }
+    }
+
+    this.animationList.push(...scene.animations);
   }
 }

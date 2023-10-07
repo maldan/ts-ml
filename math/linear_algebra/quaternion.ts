@@ -41,7 +41,7 @@ export class Quaternion {
     let wy = w * y2;
     let wz = w * z2;
 
-    let mx = new Matrix4x4().identity();
+    let mx = Matrix4x4.identity();
 
     mx.raw[0] = 1.0 - (yy + zz);
     mx.raw[4] = xy - wz;

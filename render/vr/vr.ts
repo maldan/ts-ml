@@ -7,7 +7,6 @@ export class VR_Render {
   refSpace: XRReferenceSpace;
   session: XRSession;
   isActive: boolean = false;
-  onBeforeTick: (delta: number) => void = () => {};
   onTick: (delta: number) => void = () => {};
   lastTime: number = 0;
 
@@ -80,6 +79,7 @@ export class VR_Render {
             gripPose.transform.matrix,
           );
         }
+
         if (inputSource.handedness == 'right') {
           // Right trigger
           this._render.vrHeadset.right.controller.trigger = gamepad.buttons[0].pressed;

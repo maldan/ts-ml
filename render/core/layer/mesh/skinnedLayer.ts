@@ -5,6 +5,7 @@ import { SkinnedMesh } from '../../../primitive/skinnedMesh';
 import { Render } from '../../render';
 import { Scene } from '../../scene';
 import { skinnedMeshShaderText } from './shader';
+import { Skeleton } from '../../../skeleton/skeleton';
 
 export class SkinnedElement extends RenderElement {
   public mesh: SkinnedMesh;
@@ -37,8 +38,8 @@ export class SkinnedElement extends RenderElement {
     this.uploadBuffer('boneWeight', this.mesh.plainBoneWeight);
     this.uploadBuffer('boneIndex', this.mesh.plainBoneIndex);
 
-    this.createTexture('uTextureColor', { filtration: 'linear' });
-    this.createTexture('uTextureNormal', { filtration: 'linear' });
+    this.createTexture('uTextureColor', { filtration: 'linear', useMapMaps: true });
+    this.createTexture('uTextureNormal', { filtration: 'linear', useMapMaps: true });
     this.createTexture('uBone', { filtration: 'nearest', type: 'r32f', width: 64, height: 64 });
   }
 
@@ -83,6 +84,7 @@ export class SkinnedMeshLayer extends RenderLayer {
   private _render: Render;
   public scene: Scene;
   public list: SkinnedElement[] = [];
+  public skeleton: Set<Skeleton> = new Set();
 
   constructor(scene: Scene) {
     super(scene._render.gl);
@@ -95,12 +97,16 @@ export class SkinnedMeshLayer extends RenderLayer {
   public add(element: SkinnedElement) {
     element.shaderMap = this.shaderMap;
     this.list.push(element);
+    this.skeleton.add(element.mesh.skeleton);
   }
 
   update(delta: number) {
-    this.list.forEach((element) => {
-      element.mesh.skeleton.update();
+    this.skeleton.forEach((element) => {
+      element.update();
     });
+    /*this.list.forEach((element) => {
+      element.mesh.skeleton.update();
+    });*/
   }
 
   render(eye: IEye) {
