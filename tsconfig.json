@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "es2020",
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "allowJs": true,
+    "noEmit": false,
+    "alwaysStrict": true,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "moduleResolution": "nodenext",
+    "declaration": false,
+    "lib": [
+      "dom", "es2020"
+    ],
+    "baseUrl": ".",
+  },
+  "buildOptions": {
+
+  }
+}
