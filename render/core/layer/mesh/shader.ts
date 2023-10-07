@@ -15,7 +15,6 @@ in uint aBoneIndex;
 
 uniform mat4 uProjectionMatrix;
 uniform mat4 uViewMatrix;
-uniform sampler2D uObject;
 uniform sampler2D uBone;
 
 out vec3 vPosition;
@@ -92,21 +91,6 @@ void main() {
     vPosition = (vec4(aPosition.xyz, 1.0) * skinMatrix).xyz;
     vUV = aUV;
     
-    // Static light
-    //vec3 directionalVector = normalize(vec3(0.0, 0.0, 1.0));
-    //vec3 ambientLight = vec3(0.1, 0.1, 0.1);
-    //vec3 directionalLightColor = vec3(1.0, 1.0, 1.0);
-    
-    // Prepare normal matrix
-    //mat4 normalMatrix = identity();
-    //normalMatrix = inverse(identity() * skinMatrix);
-    //normalMatrix = transpose(normalMatrix);
-    
-    // Calculate light
-    // vTangent = aTangent;
-    // vBiTangent = aBiTangent;
-    //vNormal = normalMatrix * vec4(aNormal.xyz, 1.0);
-    
     // TBN Matrix
     mat4 modelMatrix = skinMatrix;
     vec3 T = normalize(vec3(modelMatrix * vec4(aTangent,   1.0)));
@@ -128,7 +112,6 @@ in mat3 vTBN;
 
 out vec4 color;
 
-uniform sampler2D uObject;
 uniform sampler2D uBone;
 uniform sampler2D uTextureColor;
 uniform sampler2D uTextureNormal;

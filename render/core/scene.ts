@@ -56,12 +56,12 @@ export class Scene extends RenderElement {
     if (scene.textures) {
       for (let i = 0; i < scene.textures.length; i++) {
         const name = `${id}_${scene.textures[i].source}`;
-        this.createTexture(name);
+        this.createTexture(name, {});
         this.uploadImageInTexture(name, scene.textures[i].image.image);
       }
     } else {
       const name = `${id}_0`;
-      this.createTexture(name);
+      this.createTexture(name, {});
     }
 
     // Parse skins
@@ -77,7 +77,19 @@ export class Scene extends RenderElement {
           skinnedMesh.skeleton = skeleton;
           skinnedMesh.set(primitive);
 
+          // Create render element
           const element = new SkinnedElement(gl, skinnedMesh);
+
+          // Assign textures
+          try {
+            element.textureMap['uTextureColor'] =
+              this.textureMap[`${id}_${primitive.material.textureColorId}`];
+          } catch {}
+          try {
+            element.textureMap['uTextureNormal'] =
+              this.textureMap[`${id}_${primitive.material.textureNormalId}`];
+          } catch {}
+
           this.layer.skinnedMesh.add(element);
         });
       }

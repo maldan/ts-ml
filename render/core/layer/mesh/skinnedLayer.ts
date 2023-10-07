@@ -36,18 +36,43 @@ export class SkinnedElement extends RenderElement {
     this.uploadBuffer('uv', this.mesh.plainUV);
     this.uploadBuffer('boneWeight', this.mesh.plainBoneWeight);
     this.uploadBuffer('boneIndex', this.mesh.plainBoneIndex);
+
+    this.createTexture('uTextureColor', { filtration: 'linear' });
+    this.createTexture('uTextureNormal', { filtration: 'linear' });
+    this.createTexture('uBone', { filtration: 'nearest', type: 'r32f', width: 64, height: 64 });
+  }
+
+  updateBoneTexture() {
+    // Fill each bone matrix
+    const pixels = new Float32Array(64 * 64);
+    let id = 0;
+    this.mesh.skeleton.boneList.forEach((bone) => {
+      let mx = bone.matrix.multiply(bone.inverseBindMatrix);
+      for (let i = 0; i < mx.raw.length; i++) {
+        pixels[id] = mx.raw[i];
+        id++;
+      }
+    });
+
+    this.updateTexture('uBone', pixels);
   }
 
   render() {
+    this.updateBoneTexture();
+
     this.enableAttribute('vertex', 'aPosition:vec3');
     this.enableAttribute('tangent', 'aTangent:vec3');
     this.enableAttribute('biTangent', 'aBiTangent:vec3');
-    this.enableAttribute('normal', 'normal:vec3');
-    this.enableAttribute('uv', 'uv:vec2');
-    this.enableAttribute('boneWeight', 'boneWeight:vec4');
-    this.enableAttribute('boneIndex', 'boneWeight:uint');
+    this.enableAttribute('normal', 'aNormal:vec3');
+    this.enableAttribute('uv', 'aUV:vec2');
+    this.enableAttribute('boneWeight', 'aBoneWeight:vec4');
+    this.enableAttribute('boneIndex', 'aBoneIndex:uint');
 
     this.bindElementBuffer('index');
+
+    this.activateTexture('uBone', 0);
+    this.activateTexture('uTextureColor', 1);
+    this.activateTexture('uTextureNormal', 2);
 
     // Draw
     this.drawElements(this.mesh.indices.length);
@@ -69,7 +94,6 @@ export class SkinnedMeshLayer extends RenderLayer {
 
   public add(element: SkinnedElement) {
     element.shaderMap = this.shaderMap;
-    element.textureMap = this.textureMap;
     this.list.push(element);
   }
 
