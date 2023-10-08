@@ -118,12 +118,27 @@ export class Vector3 {
     return new Vector4(this.x, this.y, this.z, w);
   }
 
+  public lerp(v2: Vector3, t: number): Vector3 {
+    return new Vector3(
+      MMath.lerp(this.x, v2.x, t),
+      MMath.lerp(this.y, v2.y, t),
+      MMath.lerp(this.z, v2.z, t),
+    );
+  }
+
   public static lerp(v1: Vector3, v2: Vector3, t: number): Vector3 {
     return new Vector3(
       MMath.lerp(v1.x, v2.x, t),
       MMath.lerp(v1.y, v2.y, t),
       MMath.lerp(v1.z, v2.z, t),
     );
+  }
+
+  public distanceTo(to: Vector3): number {
+    let a = this.x - to.x;
+    let b = this.y - to.y;
+    let c = this.z - to.z;
+    return Math.sqrt(a * a + b * b + c * c);
   }
 
   public static distance(from: Vector3, to: Vector3): number {

@@ -4,6 +4,8 @@ import { Render } from '../../render';
 import { IEye } from '../../../type';
 import { lineShaderText } from './shader';
 import { Scene } from '../../scene';
+import { Sphere } from '../../../../math/geometry/sphere';
+import { Vector3 } from '../../../../math/linear_algebra';
 
 export class LineLayer extends RenderLayer {
   private _render: Render;
@@ -27,6 +29,45 @@ export class LineLayer extends RenderLayer {
       'dynamicTop.vertex',
       'dynamicTop.color',
     );
+  }
+
+  public drawSphere(sphere: Sphere, color: number) {
+    let num_segments = 8;
+
+    let position = sphere.position;
+    let radius = sphere.radius;
+
+    // Рисуем окружности вдоль каждой из трех координатных плоскостей
+    for (let i = 0; i < num_segments; i++) {
+      let angle = (i / num_segments) * 2.0 * Math.PI;
+
+      // Рисуем окружность в плоскости XY
+      let x0 = position.x + radius * Math.cos(angle);
+      let y0 = position.y + radius * Math.sin(angle);
+      let z0 = position.z;
+      let x1 = position.x + radius * Math.cos(angle + (2.0 * Math.PI) / num_segments);
+      let y1 = position.y + radius * Math.sin(angle + (2.0 * Math.PI) / num_segments);
+      let z1 = position.z;
+      this.draw(new Line(new Vector3(x0, y0, z0), new Vector3(x1, y1, z1), color));
+
+      // Рисуем окружность в плоскости XZ
+      x0 = position.x + radius * Math.cos(angle);
+      y0 = position.y;
+      z0 = position.z + radius * Math.sin(angle);
+      x1 = position.x + radius * Math.cos(angle + (2.0 * Math.PI) / num_segments);
+      y1 = position.y;
+      z1 = position.z + radius * Math.sin(angle + (2.0 * Math.PI) / num_segments);
+      this.draw(new Line(new Vector3(x0, y0, z0), new Vector3(x1, y1, z1), color));
+
+      // Рисуем окружность в плоскости YZ
+      x0 = position.x;
+      y0 = position.y + radius * Math.cos(angle);
+      z0 = position.z + radius * Math.sin(angle);
+      x1 = position.x;
+      y1 = position.y + radius * Math.cos(angle + (2.0 * Math.PI) / num_segments);
+      z1 = position.z + radius * Math.sin(angle + (2.0 * Math.PI) / num_segments);
+      this.draw(new Line(new Vector3(x0, y0, z0), new Vector3(x1, y1, z1), color));
+    }
   }
 
   public draw(line: Line) {

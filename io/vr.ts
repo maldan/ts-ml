@@ -1,4 +1,5 @@
 import { Matrix4x4, Quaternion, Vector2, Vector3 } from '../math/linear_algebra';
+import { Ray } from '../math/geometry/ray';
 
 class VR_Controller {
   public headset: VR_Headset;
@@ -10,23 +11,32 @@ class VR_Controller {
     this.headset = headset;
   }
 
-  public getRay(): { from: Vector3; to: Vector3 } {
-    let offsetTransform = Matrix4x4.identity()
-      .rotateQuaternion(this.headset.rotationOffset)
-      .translate(this.headset.positionOffset.invert());
-
-    let from = this.transform.multiply(offsetTransform);
-    let head = this.headset.positionOffset
+  public getRay(length: number): Ray {
+    // From
+    let fr = Matrix4x4.identity();
+    fr = fr.translate(this.transform.getPosition());
+    fr = fr.rotateQuaternion(this.transform.getRotation());
+    let from = fr
+      .getPosition()
       .toVector4(0.0)
-      .multiplyMatrix(offsetTransform)
-      .toVector3();
-    let to = Matrix4x4.identity();
-    to.rotateQuaternion_(from.getRotation());
-    to.translate_(new Vector3(0, 0, -2));
-    to.rotateQuaternion_(from.getRotation().invert());
-    to.translate_(from.getPosition().add(head));
+      .multiplyMatrix(this.headset.rotationOffset.invert().toMatrix4x4())
+      .toVector3()
+      .add(this.headset.positionOffset);
 
-    return { from: from.getPosition().add(head), to: to.getPosition() };
+    // To
+    fr = Matrix4x4.identity();
+    fr = fr.translate(this.transform.getPosition());
+    fr = fr.rotateQuaternion(this.transform.getRotation());
+    fr = fr.translate(new Vector3(0, 0, -length));
+
+    let to = fr
+      .getPosition()
+      .toVector4(0.0)
+      .multiplyMatrix(this.headset.rotationOffset.invert().toMatrix4x4())
+      .toVector3()
+      .add(this.headset.positionOffset);
+
+    return new Ray(from, to);
   }
 }
 
