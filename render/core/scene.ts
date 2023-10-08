@@ -57,6 +57,10 @@ export class Scene extends RenderElement {
     this.layer.staticMesh.render(eye);
   }
 
+  public end() {
+    this.layer.line.end();
+  }
+
   public addGLTF(scene: GLTF) {
     const gl = this._render.gl;
     const id = Math.random() + '_';

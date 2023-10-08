@@ -92,9 +92,6 @@ export class LineLayer extends RenderLayer {
     this.enableAttribute('dynamic.color', 'aColor:uint');
 
     gl.drawArrays(gl.LINES, 0, size);
-
-    // Clear lines
-    this.dynamicLines.length = 0;
   }
 
   private renderDynamicTop() {
@@ -119,6 +116,11 @@ export class LineLayer extends RenderLayer {
     this.enableAttribute('dynamicTop.color', 'aColor:uint');
 
     gl.drawArrays(gl.LINES, 0, size);
+  }
+
+  public end() {
+    // Clear lines
+    this.dynamicLines.length = 0;
 
     // Clear lines
     this.dynamicTopLines.length = 0;

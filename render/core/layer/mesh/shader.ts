@@ -93,9 +93,9 @@ void main() {
     
     // TBN Matrix
     mat4 modelMatrix = skinMatrix;
-    vec3 T = normalize(vec3(modelMatrix * vec4(aTangent,   1.0)));
-    vec3 B = normalize(vec3(modelMatrix * vec4(aBiTangent, 1.0)));
-    vec3 N = normalize(vec3(modelMatrix * vec4(aNormal,    1.0)));
+    vec3 T = normalize(vec3(modelMatrix * vec4(aTangent,   0.0)));
+    vec3 B = normalize(vec3(modelMatrix * vec4(aBiTangent, 0.0)));
+    vec3 N = normalize(vec3(modelMatrix * vec4(aNormal,    0.0)));
     vTBN = mat3(T, B, N);
 }
 

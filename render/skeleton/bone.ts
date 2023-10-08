@@ -35,10 +35,14 @@ export class Bone {
   }
 
   public update(parent: Matrix4x4) {
-    let mx = Matrix4x4.identity();
-    mx = mx.translate(this.position);
-    mx = mx.rotateQuaternion(this.rotation.mul(this.localRotation));
-    this.matrix = parent.multiply(mx);
+    /*let mx = Matrix4x4.identity();
+    mx = mx.translate_(this.position);
+    mx = mx.rotateQuaternion_(this.rotation.mul(this.localRotation));*/
+    this.matrix
+      .identity_()
+      .translate_(this.position)
+      .rotateQuaternion_(this.rotation.mul(this.localRotation));
+    this.matrix = parent.multiply(this.matrix);
     this.parentMatrix = parent;
 
     for (let i = 0; i < this.children.length; i++) {

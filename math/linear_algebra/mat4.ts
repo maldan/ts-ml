@@ -14,6 +14,30 @@ export class Matrix4x4 {
     return new Matrix4x4(new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]));
   }
 
+  public identity_(): Matrix4x4 {
+    this.raw[0] = 1;
+    this.raw[1] = 0;
+    this.raw[2] = 0;
+    this.raw[3] = 0;
+
+    this.raw[4] = 0;
+    this.raw[5] = 1;
+    this.raw[6] = 0;
+    this.raw[7] = 0;
+
+    this.raw[8] = 0;
+    this.raw[9] = 0;
+    this.raw[10] = 1;
+    this.raw[11] = 0;
+
+    this.raw[12] = 0;
+    this.raw[13] = 0;
+    this.raw[14] = 0;
+    this.raw[15] = 1;
+
+    return this;
+  }
+
   public clone(): Matrix4x4 {
     const r = new Float32Array(16);
     r.set(this.raw, 0);
@@ -58,7 +82,8 @@ export class Matrix4x4 {
   }
 
   public translate(v: Vector3): Matrix4x4 {
-    let a00 = this.raw[0];
+    return this.clone().translate_(v);
+    /*let a00 = this.raw[0];
     let a01 = this.raw[1];
     let a02 = this.raw[2];
     let a03 = this.raw[3];
@@ -90,12 +115,49 @@ export class Matrix4x4 {
     m.raw[14] = a02 * v.x + a12 * v.y + a22 * v.z + m.raw[14];
     m.raw[15] = a03 * v.x + a13 * v.y + a23 * v.z + m.raw[15];
 
-    return m;
+    return m;*/
+  }
+
+  public translate_(v: Vector3): Matrix4x4 {
+    let a00 = this.raw[0];
+    let a01 = this.raw[1];
+    let a02 = this.raw[2];
+    let a03 = this.raw[3];
+    let a10 = this.raw[4];
+    let a11 = this.raw[5];
+    let a12 = this.raw[6];
+    let a13 = this.raw[7];
+    let a20 = this.raw[8];
+    let a21 = this.raw[9];
+    let a22 = this.raw[10];
+    let a23 = this.raw[11];
+
+    this.raw[0] = a00;
+    this.raw[1] = a01;
+    this.raw[2] = a02;
+    this.raw[3] = a03;
+    this.raw[4] = a10;
+    this.raw[5] = a11;
+    this.raw[6] = a12;
+    this.raw[7] = a13;
+    this.raw[8] = a20;
+    this.raw[9] = a21;
+    this.raw[10] = a22;
+    this.raw[11] = a23;
+    this.raw[12] = a00 * v.x + a10 * v.y + a20 * v.z + this.raw[12];
+    this.raw[13] = a01 * v.x + a11 * v.y + a21 * v.z + this.raw[13];
+    this.raw[14] = a02 * v.x + a12 * v.y + a22 * v.z + this.raw[14];
+    this.raw[15] = a03 * v.x + a13 * v.y + a23 * v.z + this.raw[15];
+
+    return this;
   }
 
   public rotateQuaternion(q: Quaternion): Matrix4x4 {
-    let mm = q.toMatrix4x4();
-    return this.multiply(mm);
+    return this.multiply(q.toMatrix4x4());
+  }
+
+  public rotateQuaternion_(q: Quaternion): Matrix4x4 {
+    return this.multiply_(q.toMatrix4x4());
   }
 
   public scale(v: Vector3): Matrix4x4 {
@@ -120,7 +182,69 @@ export class Matrix4x4 {
   }
 
   public multiply(b: Matrix4x4): Matrix4x4 {
-    let m = this.clone();
+    return this.clone().multiply_(b);
+
+    /*let m = this.clone();
+
+    let a00 = this.raw[0];
+    let a01 = this.raw[1];
+    let a02 = this.raw[2];
+    let a03 = this.raw[3];
+    let a10 = this.raw[4];
+    let a11 = this.raw[5];
+    let a12 = this.raw[6];
+    let a13 = this.raw[7];
+    let a20 = this.raw[8];
+    let a21 = this.raw[9];
+    let a22 = this.raw[10];
+    let a23 = this.raw[11];
+    let a30 = this.raw[12];
+    let a31 = this.raw[13];
+    let a32 = this.raw[14];
+    let a33 = this.raw[15];
+
+    // Cache only the current line of the second matrix
+    let b0 = b.raw[0];
+    let b1 = b.raw[1];
+    let b2 = b.raw[2];
+    let b3 = b.raw[3];
+    m.raw[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+    m.raw[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+    m.raw[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+    m.raw[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+
+    b0 = b.raw[4];
+    b1 = b.raw[5];
+    b2 = b.raw[6];
+    b3 = b.raw[7];
+    m.raw[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+    m.raw[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+    m.raw[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+    m.raw[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+
+    b0 = b.raw[8];
+    b1 = b.raw[9];
+    b2 = b.raw[10];
+    b3 = b.raw[11];
+    m.raw[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+    m.raw[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+    m.raw[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+    m.raw[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+
+    b0 = b.raw[12];
+    b1 = b.raw[13];
+    b2 = b.raw[14];
+    b3 = b.raw[15];
+    m.raw[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+    m.raw[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+    m.raw[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+    m.raw[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+
+    return m;*/
+  }
+
+  public multiply_(b: Matrix4x4): Matrix4x4 {
+    let m = this;
 
     let a00 = this.raw[0];
     let a01 = this.raw[1];

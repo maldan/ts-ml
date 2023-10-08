@@ -39,6 +39,10 @@ export class Render {
     this.scene.render(eye);
   }
 
+  public end() {
+    this.scene.end();
+  }
+
   public clear() {
     let gl = this.gl;
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
