@@ -2,27 +2,28 @@ import type { GLTF } from './index.js';
 import { parseAccessor } from './util.js';
 import type { GLTF_Node } from './node.js';
 import { GLTF_Mesh } from './mesh';
-import { Matrix4x4 } from '../../math/linear_algebra';
+import { Matrix4x4, Quaternion, Vector3 } from '../../math/linear_algebra';
 import { Slice } from '../../slice';
 
 export class GLTF_Bone {
-  id: number;
-  name: string;
-  gltf: GLTF;
-  children: number[];
-  position = [0, 0, 0];
-  rotation = [0, 0, 0, 1];
-  scale = [1, 1, 1];
-  inverseBindMatrix = new Matrix4x4();
+  public gltf: GLTF;
+
+  public id: number;
+  public name: string;
+  public children: number[];
+  public position: Vector3 = Vector3.zero;
+  public rotation = Quaternion.identity();
+  public scale = Vector3.one;
+  public inverseBindMatrix = new Matrix4x4();
 
   constructor(node: GLTF_Node) {
     this.gltf = node.gltf;
     this.id = node.id;
     this.name = node.name;
     this.children = node.children;
-    this.position = node.position;
-    this.rotation = node.rotation;
-    this.scale = node.scale;
+    this.position = node.position.clone();
+    this.rotation = node.rotation.clone();
+    this.scale = node.scale.clone();
   }
 }
 
@@ -32,6 +33,7 @@ export class GLTF_Skin {
   gltf: GLTF;
   bones: GLTF_Bone[] = [];
   meshes: GLTF_Mesh[] = [];
+  boneMap: Record<string, GLTF_Bone> = {};
 
   constructor(gltf: GLTF, props: any) {
     this.gltf = gltf;
@@ -40,7 +42,9 @@ export class GLTF_Skin {
 
     // Fill bones
     for (let i = 0; i < props.joints.length; i++) {
-      this.bones.push(new GLTF_Bone(this.gltf.nodes[props.joints[i]]));
+      const bone = new GLTF_Bone(this.gltf.nodes[props.joints[i]]);
+      this.bones.push(bone);
+      this.boneMap[bone.name] = bone;
     }
 
     // Fill meshes
@@ -58,5 +62,9 @@ export class GLTF_Skin {
     for (let i = 0; i < matrixList.length; i++) {
       this.bones[i].inverseBindMatrix = new Matrix4x4(matrixList[i] as Float32Array);
     }
+  }
+
+  public getBoneByName(name: string): GLTF_Bone | undefined {
+    return this.boneMap[name];
   }
 }

@@ -161,7 +161,11 @@ export class Matrix4x4 {
   }
 
   public scale(v: Vector3): Matrix4x4 {
-    let m = this.clone();
+    return this.clone().scale_(v);
+  }
+
+  public scale_(v: Vector3): Matrix4x4 {
+    let m = this;
 
     m.raw[0] *= v.x;
     m.raw[1] *= v.x;

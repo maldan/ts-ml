@@ -83,9 +83,10 @@ export class GLTF {
       }) || [];
 
     // Create meshes
-    this.meshes = this.struct.meshes.map((x: any) => {
-      return new GLTF_Mesh(this, x);
-    });
+    this.meshes =
+      this.struct.meshes?.map((x: any) => {
+        return new GLTF_Mesh(this, x);
+      }) || [];
 
     // Nodes
     this.nodes = this.struct.nodes.map((x: any, index: number) => {
@@ -94,15 +95,17 @@ export class GLTF {
     });
 
     // Skins
-    this.skins = this.struct.skins.map((x: any, id: number) => {
-      x.id = id;
-      return new GLTF_Skin(this, x);
-    });
+    this.skins =
+      this.struct.skins?.map((x: any, id: number) => {
+        x.id = id;
+        return new GLTF_Skin(this, x);
+      }) || [];
 
     // Textures
-    this.textures = this.struct.textures.map((x: any) => {
-      return new GLTF_Texture(this, x);
-    });
+    this.textures =
+      this.struct.textures?.map((x: any) => {
+        return new GLTF_Texture(this, x);
+      }) || [];
 
     // Animations
     this.animations =

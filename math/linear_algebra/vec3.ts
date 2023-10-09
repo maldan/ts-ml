@@ -141,6 +141,10 @@ export class Vector3 {
     return Math.sqrt(a * a + b * b + c * c);
   }
 
+  public equals(v: Vector3): boolean {
+    return this.x === v.x && this.y === v.y && this.z === v.z;
+  }
+
   public static distance(from: Vector3, to: Vector3): number {
     let a = from.x - to.x;
     let b = from.y - to.y;

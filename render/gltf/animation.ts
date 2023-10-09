@@ -62,6 +62,10 @@ export class GLTF_Animation {
     type: string;
     value: Vector3 | Quaternion;
   }[] = [];
+  // public retargetKeys: Record<string, string> = {};
+  public retargetTranslation: Record<string, Vector3> = {};
+  public retargetRotation: Record<string, Quaternion> = {};
+  public speed: number = 1;
 
   constructor(gltf: GLTF, animation: any) {
     this.gltf = gltf;
@@ -98,7 +102,26 @@ export class GLTF_Animation {
     }
   }
 
+  public renameKeys(map: Record<string, string>) {
+    this.sequenceList.forEach((sequence) => {
+      if (map[sequence.key]) {
+        sequence.key = map[sequence.key];
+      }
+    });
+  }
+
+  public scalePosition(s: number) {
+    this.sequenceList.forEach((sequence) => {
+      if (sequence.type === 'translation') {
+        sequence.valueList = sequence.valueList.map((v: Vector3) => {
+          return v.scale(s);
+        });
+      }
+    });
+  }
+
   public tick(delta: number) {
+    delta *= this.speed;
     this.currentTime += delta;
     if (this.currentTime > this.duration) {
       this.currentTime %= this.duration;
@@ -107,10 +130,29 @@ export class GLTF_Animation {
     this.currentFrame.length = 0;
     for (let i = 0; i < this.sequenceList.length; i++) {
       this.sequenceList[i].calculateFrames(this.currentTime);
+
+      const key = this.sequenceList[i].key;
+      const value = this.sequenceList[i].calculateFrameValue(this.currentTime);
+      const type = this.sequenceList[i].type;
+
+      if (type === 'translation') {
+        const retarget = this.retargetTranslation[this.sequenceList[i].key];
+        if (retarget) {
+          (value as Vector3).add_(retarget);
+        }
+      }
+
+      if (type === 'rotation') {
+        const retarget = this.retargetRotation[this.sequenceList[i].key];
+        if (retarget) {
+          (value as Quaternion).mul_(retarget);
+        }
+      }
+
       this.currentFrame.push({
-        key: this.sequenceList[i].key,
-        type: this.sequenceList[i].type,
-        value: this.sequenceList[i].calculateFrameValue(this.currentTime),
+        key,
+        type,
+        value,
       });
     }
   }

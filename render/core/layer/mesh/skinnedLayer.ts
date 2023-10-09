@@ -16,7 +16,7 @@ export class SkinnedElement extends RenderElement {
     this.mesh = mesh;
     this.mesh.calculateTangent();
 
-    console.log(this.mesh);
+    // console.log(this.mesh);
 
     this.createBuffer(
       'index',
@@ -84,7 +84,7 @@ export class SkinnedMeshLayer extends RenderLayer {
   private _render: Render;
   public scene: Scene;
   public list: SkinnedElement[] = [];
-  public skeleton: Set<Skeleton> = new Set();
+  public skeleton: Skeleton[] = [];
 
   constructor(scene: Scene) {
     super(scene._render.gl);
@@ -97,7 +97,8 @@ export class SkinnedMeshLayer extends RenderLayer {
   public add(element: SkinnedElement) {
     element.shaderMap = this.shaderMap;
     this.list.push(element);
-    this.skeleton.add(element.mesh.skeleton);
+    this.skeleton.push(element.mesh.skeleton);
+    this.skeleton = Array.from(new Set(this.skeleton));
   }
 
   update(delta: number) {

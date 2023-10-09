@@ -75,9 +75,7 @@ export class VR_Render {
           this._render.vrHeadset.left.controller.axis.y = inputSource.gamepad?.axes[3] || 0;
 
           // Left controller transform
-          this._render.vrHeadset.left.controller.transform = new Matrix4x4(
-            gripPose.transform.matrix,
-          );
+          this._render.vrHeadset.left.controller.matrix = new Matrix4x4(gripPose.transform.matrix);
         }
 
         if (inputSource.handedness == 'right') {
@@ -89,9 +87,7 @@ export class VR_Render {
           this._render.vrHeadset.right.controller.axis.y = inputSource.gamepad?.axes[3] || 0;
 
           // Right controller transform
-          this._render.vrHeadset.right.controller.transform = new Matrix4x4(
-            gripPose.transform.matrix,
-          );
+          this._render.vrHeadset.right.controller.matrix = new Matrix4x4(gripPose.transform.matrix);
         }
       }
     }

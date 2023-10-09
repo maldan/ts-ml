@@ -6,6 +6,10 @@ import { lineShaderText } from './shader';
 import { Scene } from '../../scene';
 import { Sphere } from '../../../../math/geometry/sphere';
 import { Vector3 } from '../../../../math/linear_algebra';
+import { Triangle, Cube } from '../../../../math/geometry';
+import { VerletLine } from '@maldan/ml/physics/verlet';
+import { Skeleton } from '../../../skeleton/skeleton';
+import { Bone } from '../../../skeleton/bone';
 
 export class LineLayer extends RenderLayer {
   private _render: Render;
@@ -29,6 +33,55 @@ export class LineLayer extends RenderLayer {
       'dynamicTop.vertex',
       'dynamicTop.color',
     );
+  }
+
+  public drawBone(bone: Bone, color: number) {
+    bone.children.forEach((children) => {
+      this.drawTop(
+        new Line(
+          bone.position.toVector4(1.0).multiplyMatrix(bone.matrix).toVector3(),
+          children.position.toVector4(1.0).multiplyMatrix(children.matrix).toVector3(),
+          color,
+        ),
+      );
+      this.drawBone(children, color);
+    });
+  }
+
+  public drawSkeleton(skeleton: Skeleton, color: number) {
+    if (!skeleton) return;
+    skeleton.boneHierarchy.forEach((bone) => {
+      this.drawBone(bone, color);
+    });
+  }
+
+  public drawTriangle(triangle: Triangle, color: number) {
+    this.draw(new Line(triangle.a, triangle.b, color));
+    this.draw(new Line(triangle.b, triangle.c, color));
+    this.draw(new Line(triangle.c, triangle.a, color));
+  }
+
+  public drawVerlet(list: VerletLine[], color: number) {
+    list.forEach((line) => {
+      this.draw(new Line(line.fromPosition, line.toPosition, color));
+    });
+  }
+
+  public drawCube(cube: Cube, color: number) {
+    this.draw(new Line(cube.vertices[0], cube.vertices[1], color));
+    this.draw(new Line(cube.vertices[1], cube.vertices[2], color));
+    this.draw(new Line(cube.vertices[2], cube.vertices[3], color));
+    this.draw(new Line(cube.vertices[3], cube.vertices[0], color));
+
+    this.draw(new Line(cube.vertices[4], cube.vertices[5], color));
+    this.draw(new Line(cube.vertices[5], cube.vertices[6], color));
+    this.draw(new Line(cube.vertices[6], cube.vertices[7], color));
+    this.draw(new Line(cube.vertices[7], cube.vertices[4], color));
+
+    this.draw(new Line(cube.vertices[0], cube.vertices[4], color));
+    this.draw(new Line(cube.vertices[1], cube.vertices[5], color));
+    this.draw(new Line(cube.vertices[2], cube.vertices[6], color));
+    this.draw(new Line(cube.vertices[3], cube.vertices[7], color));
   }
 
   public drawSphere(sphere: Sphere, color: number) {

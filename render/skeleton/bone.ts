@@ -19,16 +19,10 @@ export class Bone {
   constructor(bone: GLTF_Bone) {
     this.id = bone.id;
     this.name = bone.name;
-    this.position = new Vector3(bone.position[0], bone.position[1], bone.position[2]);
-    this.rotation = new Quaternion(
-      bone.rotation[0],
-      bone.rotation[1],
-      bone.rotation[2],
-      bone.rotation[3],
-    );
-    this.restRotation = this.rotation.clone();
-
-    this.scale = new Vector3(bone.scale[0], bone.scale[1], bone.scale[2]);
+    this.position = bone.position.clone();
+    this.rotation = bone.rotation.clone();
+    this.restRotation = bone.rotation.clone();
+    this.scale = bone.scale.clone();
     this.inverseBindMatrix = bone.inverseBindMatrix;
     this.childrenId = bone.children;
     // this.calculate();

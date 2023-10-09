@@ -14,6 +14,13 @@ export class Quaternion {
     this.w = w ?? 0;
   }
 
+  public set(q: Quaternion) {
+    this.x = q.x;
+    this.y = q.y;
+    this.z = q.z;
+    this.w = q.w;
+  }
+
   public static identity(): Quaternion {
     return new Quaternion(0, 0, 0, 1);
   }
@@ -225,6 +232,9 @@ export class Quaternion {
     return new Quaternion(crossProduct.x * k, crossProduct.y * k, crossProduct.z * k, w * k);
   }
 
+  public static difference(a: Quaternion, b: Quaternion): Quaternion {
+    return a.mul(b.invert());
+  }
   // Функция для создания кватерниона из направления (Vector3)
   /*static fromDirection(direction: Vector3) {
     direction.normalize();

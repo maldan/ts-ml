@@ -42,10 +42,40 @@ export class Skeleton {
     this.boneNameMap[name].rotation = rotation;
   }
 
+  public getBoneByName(name: string): Bone | undefined {
+    return this.boneNameMap[name];
+  }
+
   public update() {
     // Calculate bones with hierarchy
     for (let i = 0; i < this.boneHierarchy.length; i++) {
       this.boneHierarchy[i].update(Matrix4x4.identity());
     }
+  }
+
+  public renameBones(map: Record<string, string>) {
+    this.boneList.forEach((bone) => {
+      if (map[bone.name]) {
+        // Delete old key
+        delete this.boneNameMap[bone.name];
+        bone.name = map[bone.name];
+        // Set new
+        this.boneNameMap[bone.name] = bone;
+      }
+    });
+  }
+
+  public difference(target: Skeleton) {
+    const position: Record<string, Vector3> = {};
+    const rotation: Record<string, Quaternion> = {};
+    this.boneList.forEach((bone) => {
+      const bone2 = target.getBoneByName(bone.name);
+      if (bone2) {
+        position[bone.name] = bone.position.sub(bone2.position);
+        rotation[bone.name] = Quaternion.difference(bone2.rotation, bone.rotation);
+      }
+    });
+
+    return { position, rotation };
   }
 }

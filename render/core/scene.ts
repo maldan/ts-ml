@@ -11,6 +11,7 @@ import { SkinnedMesh } from '../primitive/skinnedMesh';
 import { Mesh } from '../primitive/mesh';
 import { StaticElement, StaticMeshLayer } from './layer/mesh/staticLayer';
 import { GLTF_Animation } from '../gltf/animation';
+import {Quaternion} from "@maldan/ml/math/linear_algebra";
 
 export class Scene extends RenderElement {
   public _render: Render;
@@ -47,6 +48,14 @@ export class Scene extends RenderElement {
     this.camera.calculateView();
     this.animationList.forEach((x) => {
       x.tick(delta);
+      x.currentFrame.forEach(frame => {
+        if (frame.type === "translation") {
+          this.layer.skinnedMesh.skeleton[0].setBonePosition(frame.key, frame.value as Vector3);
+        }
+        if (frame.type === "rotation") {
+          this.layer.skinnedMesh.skeleton[0].setBoneRotation(frame.key, frame.value as Quaternion);
+        }
+      });
     });
     this.layer.skinnedMesh.update(delta);
   }
