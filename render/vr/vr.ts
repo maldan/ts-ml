@@ -40,8 +40,8 @@ export class VR_Render {
 
   step(timestamp: DOMHighResTimeStamp, frame: XRFrame) {
     let delta = (timestamp - this.lastTime) / 1000;
-    if (delta < 0.003) delta = 0.003;
-    if (delta > 0.1) delta = 0.1;
+    if (delta < 0.016 / 4) delta = 0.016 / 4;
+    if (delta > 0.016 * 4) delta = 0.016 * 4;
 
     this.isActive = true;
 

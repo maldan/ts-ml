@@ -6,10 +6,11 @@ export class Bone {
   public name: string;
   public inverseBindMatrix = new Matrix4x4();
   public position = new Vector3(0, 0, 0);
-  public localPosition = new Vector3(0, 0, 0);
+  public restPosition = new Vector3(0, 0, 0);
+  // public localPosition = new Vector3(0, 0, 0);
   public rotation = new Quaternion(0, 0, 0, 1);
   public restRotation = new Quaternion(0, 0, 0, 1);
-  public localRotation = Quaternion.identity();
+  //public localRotation = Quaternion.identity();
   public scale = new Vector3(1, 1, 1);
   public children: Bone[] = [];
   public childrenId: number[] = [];
@@ -20,6 +21,7 @@ export class Bone {
     this.id = bone.id;
     this.name = bone.name;
     this.position = bone.position.clone();
+    this.restPosition = bone.position.clone();
     this.rotation = bone.rotation.clone();
     this.restRotation = bone.rotation.clone();
     this.scale = bone.scale.clone();
@@ -29,13 +31,7 @@ export class Bone {
   }
 
   public update(parent: Matrix4x4) {
-    /*let mx = Matrix4x4.identity();
-    mx = mx.translate_(this.position);
-    mx = mx.rotateQuaternion_(this.rotation.mul(this.localRotation));*/
-    this.matrix
-      .identity_()
-      .translate_(this.position)
-      .rotateQuaternion_(this.rotation.mul(this.localRotation));
+    this.matrix.identity_().translate_(this.position).rotateQuaternion_(this.rotation);
     this.matrix = parent.multiply(this.matrix);
     this.parentMatrix = parent;
 

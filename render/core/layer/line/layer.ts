@@ -5,9 +5,8 @@ import { IEye } from '../../../type';
 import { lineShaderText } from './shader';
 import { Scene } from '../../scene';
 import { Sphere } from '../../../../math/geometry/sphere';
-import { Vector3 } from '../../../../math/linear_algebra';
+import { Vector3, Vector4 } from '../../../../math/linear_algebra';
 import { Triangle, Cube } from '../../../../math/geometry';
-import { VerletLine } from '@maldan/ml/physics/verlet';
 import { Skeleton } from '../../../skeleton/skeleton';
 import { Bone } from '../../../skeleton/bone';
 
@@ -39,8 +38,8 @@ export class LineLayer extends RenderLayer {
     bone.children.forEach((children) => {
       this.drawTop(
         new Line(
-          bone.position.toVector4(1.0).multiplyMatrix(bone.matrix).toVector3(),
-          children.position.toVector4(1.0).multiplyMatrix(children.matrix).toVector3(),
+          new Vector4(0, 0, 0, 1).multiplyMatrix(bone.matrix).toVector3(),
+          new Vector4(0, 0, 0, 1).multiplyMatrix(children.matrix).toVector3(),
           color,
         ),
       );
@@ -61,10 +60,15 @@ export class LineLayer extends RenderLayer {
     this.draw(new Line(triangle.c, triangle.a, color));
   }
 
-  public drawVerlet(list: VerletLine[], color: number) {
+  /* public drawVerlet(list: VerletLine[], color: number) {
     list.forEach((line) => {
       this.draw(new Line(line.fromPosition, line.toPosition, color));
     });
+  }*/
+  public drawFromPoints(points: Vector3[], color: number) {
+    for (let i = 0; i < points.length - 1; i++) {
+      this.draw(new Line(points[i], points[i + 1], color));
+    }
   }
 
   public drawCube(cube: Cube, color: number) {

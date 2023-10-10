@@ -5,7 +5,7 @@ class VR_Controller {
   public headset: VR_Headset;
   public axis: Vector2 = new Vector2();
   public trigger = false;
-  public matrix: Matrix4x4 = new Matrix4x4();
+  public matrix: Matrix4x4 = Matrix4x4.identity();
 
   constructor(headset: VR_Headset) {
     this.headset = headset;
@@ -59,8 +59,8 @@ class VR_Controller {
 class VR_Side {
   public headset: VR_Headset;
   public controller: VR_Controller;
-  public projectionMatrix: Matrix4x4 = new Matrix4x4();
-  public viewMatrix: Matrix4x4 = new Matrix4x4();
+  public projectionMatrix: Matrix4x4 = Matrix4x4.identity();
+  public viewMatrix: Matrix4x4 = Matrix4x4.identity();
 
   constructor(headset: VR_Headset) {
     this.headset = headset;
@@ -69,7 +69,7 @@ class VR_Side {
 }
 
 export class VR_Headset {
-  public headTransform: Matrix4x4 = new Matrix4x4();
+  public headTransform: Matrix4x4 = Matrix4x4.identity();
   public left: VR_Side = new VR_Side(this);
   public right: VR_Side = new VR_Side(this);
   public positionOffset = new Vector3();

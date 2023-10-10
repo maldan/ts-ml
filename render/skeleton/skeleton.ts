@@ -6,6 +6,8 @@ export class Skeleton {
   public boneHierarchy: Bone[] = [];
   public boneList: Bone[] = [];
   public boneNameMap: Record<string, Bone> = {};
+  public groupId: string = '';
+  public position: Vector3 = Vector3.zero;
 
   constructor() {}
 
@@ -47,9 +49,12 @@ export class Skeleton {
   }
 
   public update() {
+    let mx = Matrix4x4.identity();
+    mx.translate_(this.position);
+
     // Calculate bones with hierarchy
     for (let i = 0; i < this.boneHierarchy.length; i++) {
-      this.boneHierarchy[i].update(Matrix4x4.identity());
+      this.boneHierarchy[i].update(mx);
     }
   }
 

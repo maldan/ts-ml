@@ -1,6 +1,6 @@
 import { PerspectiveCamera } from '../camera';
 import { LineLayer } from './layer/line';
-import { Vector3 } from '../../math/linear_algebra';
+import { Quaternion, Vector3 } from '../../math/linear_algebra';
 import { Render } from './render';
 import { IEye } from '../type';
 import { GLTF } from '../gltf';
@@ -11,7 +11,6 @@ import { SkinnedMesh } from '../primitive/skinnedMesh';
 import { Mesh } from '../primitive/mesh';
 import { StaticElement, StaticMeshLayer } from './layer/mesh/staticLayer';
 import { GLTF_Animation } from '../gltf/animation';
-import {Quaternion} from "@maldan/ml/math/linear_algebra";
 
 export class Scene extends RenderElement {
   public _render: Render;
@@ -46,24 +45,28 @@ export class Scene extends RenderElement {
   public update(delta: number) {
     this.camera.calculateProjection();
     this.camera.calculateView();
-    this.animationList.forEach((x) => {
-      x.tick(delta);
-      x.currentFrame.forEach(frame => {
-        if (frame.type === "translation") {
-          this.layer.skinnedMesh.skeleton[0].setBonePosition(frame.key, frame.value as Vector3);
-        }
-        if (frame.type === "rotation") {
-          this.layer.skinnedMesh.skeleton[0].setBoneRotation(frame.key, frame.value as Quaternion);
-        }
+    this.animationList.forEach((animation) => {
+      animation.tick(delta);
+      animation.currentFrame.forEach((frame) => {
+        this.layer.skinnedMesh.skeleton
+          .filter((x) => x.groupId === animation.groupId)
+          .forEach((skeleton) => {
+            if (frame.type === 'translation') {
+              skeleton.setBonePosition(frame.key, frame.value as Vector3);
+            }
+            if (frame.type === 'rotation') {
+              skeleton.setBoneRotation(frame.key, frame.value as Quaternion);
+            }
+          });
       });
     });
     this.layer.skinnedMesh.update(delta);
   }
 
   public render(eye: IEye = '') {
-    this.layer.line.render(eye);
     this.layer.skinnedMesh.render(eye);
     this.layer.staticMesh.render(eye);
+    this.layer.line.render(eye);
   }
 
   public end() {
@@ -90,6 +93,7 @@ export class Scene extends RenderElement {
     for (let i = 0; i < scene.skins.length; i++) {
       const skin = scene.skins[i];
       const skeleton = new Skeleton().set(skin);
+      skeleton.groupId = id;
 
       for (let j = 0; j < skin.meshes.length; j++) {
         const mesh = skin.meshes[j];
@@ -142,6 +146,11 @@ export class Scene extends RenderElement {
         });
       }
     }
+
+    // Patch animations
+    scene.animations.forEach((x) => {
+      x.groupId = id;
+    });
 
     this.animationList.push(...scene.animations);
   }

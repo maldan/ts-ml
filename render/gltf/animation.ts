@@ -62,10 +62,12 @@ export class GLTF_Animation {
     type: string;
     value: Vector3 | Quaternion;
   }[] = [];
-  // public retargetKeys: Record<string, string> = {};
+
   public retargetTranslation: Record<string, Vector3> = {};
   public retargetRotation: Record<string, Quaternion> = {};
   public speed: number = 1;
+
+  public groupId: string = '';
 
   constructor(gltf: GLTF, animation: any) {
     this.gltf = gltf;
@@ -100,6 +102,18 @@ export class GLTF_Animation {
 
       this.sequenceList.push(sequence);
     }
+  }
+
+  public copySequence(from: string, to: string, type: string) {
+    const x = this.sequenceList.filter((x) => x.key === from && x.type === type);
+    x.forEach((y) => {
+      const ss = new GLTF_AnimationSequence();
+      ss.key = to;
+      ss.type = type;
+      ss.timeList = y.timeList;
+      ss.valueList = y.valueList;
+      this.sequenceList.push(ss);
+    });
   }
 
   public renameKeys(map: Record<string, string>) {

@@ -105,9 +105,6 @@ export class SkinnedMeshLayer extends RenderLayer {
     this.skeleton.forEach((element) => {
       element.update();
     });
-    /*this.list.forEach((element) => {
-      element.mesh.skeleton.update();
-    });*/
   }
 
   render(eye: IEye) {
