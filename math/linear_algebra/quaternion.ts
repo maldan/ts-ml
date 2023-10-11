@@ -166,7 +166,7 @@ export class Quaternion {
   }
 
   public multiplyMatrix(matrix: Matrix4x4): Quaternion {
-    const q = [this.x, this.y, this.z, this.w];
+    /*const q = [this.x, this.y, this.z, this.w];
 
     const result = new Array(4);
 
@@ -177,7 +177,30 @@ export class Quaternion {
       }
     }
 
-    return new Quaternion(result[0], result[1], result[2], result[3]);
+    return new Quaternion(result[0], result[1], result[2], result[3]);*/
+
+    // Преобразование кватерниона в матрицу 4x4
+    const q0 = this.w;
+    const q1 = this.x;
+    const q2 = this.y;
+    const q3 = this.z;
+
+    const m11 = matrix.raw[0];
+    const m12 = matrix.raw[1];
+    const m13 = matrix.raw[2];
+    const m21 = matrix.raw[4];
+    const m22 = matrix.raw[5];
+    const m23 = matrix.raw[6];
+    const m31 = matrix.raw[8];
+    const m32 = matrix.raw[9];
+    const m33 = matrix.raw[10];
+
+    const w = q0 * m11 + q1 * m21 + q2 * m31;
+    const x = q0 * m12 + q1 * m22 + q2 * m32;
+    const y = q0 * m13 + q1 * m23 + q2 * m33;
+    const z = q0 * matrix.raw[3] + q1 * matrix.raw[7] + q2 * matrix.raw[11] + q3;
+
+    return new Quaternion(x, y, z, w);
   }
 
   public toEuler(): Vector3 {

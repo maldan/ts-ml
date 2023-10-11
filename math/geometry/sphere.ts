@@ -1,17 +1,40 @@
-import { Vector3 } from '../linear_algebra';
+import { Matrix4x4, Quaternion, Vector3 } from '../linear_algebra';
 import { Ray } from './ray';
+import { Primitive } from './primitive';
 
-export class Sphere {
-  public position: Vector3;
+export class Sphere extends Primitive {
   public radius: number;
 
   constructor(pos: Vector3, r: number) {
+    super();
+
     this.position = pos;
     this.radius = r;
   }
 
+  public pointIntersection(point: Vector3): Vector3 | null {
+    const sphereCenter = this.matrix.getPosition();
+    const distance = point.distanceTo(sphereCenter);
+    const collisionOccurred = distance <= this.radius;
+    if (collisionOccurred) {
+      // Вычисляем вектор от центра сферы до точки коллизии
+      const collisionVector = point.sub(sphereCenter);
+
+      // Нормализуем вектор коллизии
+      const collisionDirection = collisionVector.normalize();
+
+      // Умножаем на радиус сферы, чтобы получить вектор на поверхности сферы
+      const surfaceVector = collisionDirection.scale(this.radius);
+
+      // Корректируем позицию точки после коллизии
+      return sphereCenter.add(surfaceVector);
+    } else {
+      return null;
+    }
+  }
+
   public rayIntersection(ray: Ray): Vector3 | null {
-    const sphereCenter = this.position;
+    const sphereCenter = this.matrix.getPosition();
     const segmentStart = ray.start;
     const segmentEnd = ray.end;
     const sphereRadius = this.radius;

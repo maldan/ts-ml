@@ -8,6 +8,10 @@ export class EventEmitter {
     this._list[name].push(fn);
   }
 
+  public clear() {
+    this._list = {};
+  }
+
   public emit(name: string, ...data: any[]) {
     if (!this._list[name]) return;
     this._list[name].forEach((x) => {

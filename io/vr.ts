@@ -36,7 +36,7 @@ class VR_Controller {
       .toVector3()
       .add(this.headset.positionOffset);
 
-    return new Ray(from, to);
+    return new Ray(this.absoluteMatrix.getPosition(), to);
   }
 
   public get absoluteMatrix() {

@@ -91,7 +91,7 @@ export class LineLayer extends RenderLayer {
   public drawSphere(sphere: Sphere, color: number) {
     let num_segments = 8;
 
-    let position = sphere.position;
+    let position = Vector3.zero;
     let radius = sphere.radius;
 
     // Рисуем окружности вдоль каждой из трех координатных плоскостей
@@ -105,7 +105,9 @@ export class LineLayer extends RenderLayer {
       let x1 = position.x + radius * Math.cos(angle + (2.0 * Math.PI) / num_segments);
       let y1 = position.y + radius * Math.sin(angle + (2.0 * Math.PI) / num_segments);
       let z1 = position.z;
-      this.draw(new Line(new Vector3(x0, y0, z0), new Vector3(x1, y1, z1), color));
+      let p1 = new Vector4(x0, y0, z0, 1.0).multiplyMatrix(sphere.matrix).toVector3();
+      let p2 = new Vector4(x1, y1, z1, 1.0).multiplyMatrix(sphere.matrix).toVector3();
+      this.draw(new Line(p1, p2, color));
 
       // Рисуем окружность в плоскости XZ
       x0 = position.x + radius * Math.cos(angle);
@@ -114,7 +116,9 @@ export class LineLayer extends RenderLayer {
       x1 = position.x + radius * Math.cos(angle + (2.0 * Math.PI) / num_segments);
       y1 = position.y;
       z1 = position.z + radius * Math.sin(angle + (2.0 * Math.PI) / num_segments);
-      this.draw(new Line(new Vector3(x0, y0, z0), new Vector3(x1, y1, z1), color));
+      p1 = new Vector4(x0, y0, z0, 1.0).multiplyMatrix(sphere.matrix).toVector3();
+      p2 = new Vector4(x1, y1, z1, 1.0).multiplyMatrix(sphere.matrix).toVector3();
+      this.draw(new Line(p1, p2, color));
 
       // Рисуем окружность в плоскости YZ
       x0 = position.x;
@@ -123,7 +127,9 @@ export class LineLayer extends RenderLayer {
       x1 = position.x;
       y1 = position.y + radius * Math.cos(angle + (2.0 * Math.PI) / num_segments);
       z1 = position.z + radius * Math.sin(angle + (2.0 * Math.PI) / num_segments);
-      this.draw(new Line(new Vector3(x0, y0, z0), new Vector3(x1, y1, z1), color));
+      p1 = new Vector4(x0, y0, z0, 1.0).multiplyMatrix(sphere.matrix).toVector3();
+      p2 = new Vector4(x1, y1, z1, 1.0).multiplyMatrix(sphere.matrix).toVector3();
+      this.draw(new Line(p1, p2, color));
     }
   }
 
@@ -235,6 +241,8 @@ export class LineLayer extends RenderLayer {
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    gl.lineWidth(2);
 
     // Bind matrix
     if (eye) {

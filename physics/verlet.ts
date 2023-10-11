@@ -171,10 +171,13 @@ export class VerletRope {
     return this.points[this.points.length - 1];
   }
 
-  public update(delta: number) {
+  public updatePhysics(delta: number) {
     for (let i = 0; i < this.points.length; i++) {
       this.points[i].update(delta);
     }
+  }
+
+  public applyConstraint() {
     for (let k = 0; k < this.constraintIterations; k++) {
       for (let i = 0; i < this.constraints.length; i++) {
         this.constraints[i].apply();

@@ -1,18 +1,16 @@
 import { Matrix4x4, Quaternion, Vector3 } from '../linear_algebra';
 import { Ray } from './ray';
 import { Triangle } from './triangle';
+import { Primitive } from './primitive';
 
-export class Cube {
-  public position: Vector3;
-  public rotation: Quaternion = Quaternion.identity();
-  public scale: Vector3 = Vector3.one;
+export class Cube extends Primitive {
   public size: Vector3;
-  public matrix: Matrix4x4 = Matrix4x4.identity();
   private _vertices: Vector3[] = new Array(8).fill(Vector3.zero);
   public vertices: Vector3[] = new Array(8).fill(Vector3.zero);
-  public parentMatrix: Matrix4x4;
 
   constructor(position: Vector3, size: Vector3) {
+    super();
+
     this.position = position;
     this.size = size;
 
@@ -29,17 +27,6 @@ export class Cube {
     this._vertices[5] = new Vector3(sizeX, -sizeY, -sizeZ);
     this._vertices[6] = new Vector3(sizeX, sizeY, -sizeZ);
     this._vertices[7] = new Vector3(-sizeX, sizeY, -sizeZ);
-  }
-
-  public calculateMatrix() {
-    this.matrix = Matrix4x4.identity();
-    this.matrix = this.matrix.rotateQuaternion(this.rotation);
-    this.matrix = this.matrix.translate(this.position);
-    this.matrix = this.matrix.scale(this.scale);
-
-    if (this.parentMatrix) {
-      this.matrix = this.parentMatrix.multiply(this.matrix);
-    }
   }
 
   public calculateVertices() {
