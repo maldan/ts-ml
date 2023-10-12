@@ -101,6 +101,7 @@ export class Scene extends RenderElement {
         mesh.primitives.forEach((primitive) => {
           const skinnedMesh = new SkinnedMesh();
           skinnedMesh.skeleton = skeleton;
+          skinnedMesh.name = mesh.nodeName;
           skinnedMesh.set(primitive);
 
           // Create render element
@@ -127,6 +128,7 @@ export class Scene extends RenderElement {
         const mesh = scene.meshes[scene.nodes[i].meshId];
         mesh.primitives.forEach((primitive) => {
           const staticMesh = new Mesh();
+          staticMesh.name = mesh.nodeName;
           staticMesh.set(primitive);
 
           // Create render element

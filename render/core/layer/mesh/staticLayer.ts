@@ -17,8 +17,6 @@ export class StaticElement extends RenderElement {
     this.mesh = mesh;
     this.mesh.calculateTangent();
 
-    console.log(this.mesh);
-
     this.createBuffer('index', 'vertex', 'tangent', 'biTangent', 'normal', 'uv');
 
     this.uploadElementBuffer('index', this.mesh.plainIndices);
@@ -33,6 +31,13 @@ export class StaticElement extends RenderElement {
   }
 
   render() {
+    if (this.mesh.isLiveUpdateVertexInGPU) {
+      this.mesh.calculateTangent();
+      this.uploadBuffer('vertex', this.mesh.plainVertices);
+      this.uploadBuffer('tangent', this.mesh.plainTangent);
+      this.uploadBuffer('biTangent', this.mesh.plainBiTangent);
+    }
+
     this.enableAttribute('vertex', 'aPosition:vec3');
     this.enableAttribute('tangent', 'aTangent:vec3');
     this.enableAttribute('biTangent', 'aBiTangent:vec3');
@@ -73,8 +78,8 @@ export class StaticMeshLayer extends RenderLayer {
     const gl = this.gl;
 
     // Preparations
-    gl.enable(gl.CULL_FACE);
-    gl.cullFace(gl.BACK);
+    gl.disable(gl.CULL_FACE);
+    // gl.cullFace(gl.BACK);
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);

@@ -1,10 +1,11 @@
-import type { GLTF } from "./index.js";
-import { byteLength, numberOfComponents, parseAccessor } from "./util.js";
-import type { GLTF_Material } from "./material.js";
+import type { GLTF } from './index.js';
+import { byteLength, numberOfComponents, parseAccessor } from './util.js';
+import type { GLTF_Material } from './material.js';
 
 export class GLTF_MeshPrimitive {
   public gltf: GLTF;
   public attributes: {
+    COLOR_0: number;
     POSITION: number;
     NORMAL: number;
     TEXCOORD_0: number;
@@ -31,6 +32,22 @@ export class GLTF_MeshPrimitive {
     let p = this.attributes.NORMAL;
     if (p === undefined) return new Float32Array([]);
     return parseAccessor(this.gltf, p) as Float32Array;
+  }
+
+  get color(): Float32Array {
+    let p = this.attributes.COLOR_0;
+    if (p === undefined) return new Float32Array([]);
+    let x = parseAccessor(this.gltf, p);
+    let out = [];
+    if (x instanceof Uint16Array) {
+      for (let i = 0; i < x.length; i++) {
+        let c = (x[i] / 65536) * 255;
+        if (c < 0) c = 0;
+        if (c > 255) c = 255;
+        out.push(Math.round(c));
+      }
+    }
+    return new Float32Array(out);
   }
 
   get uv(): Float32Array {
@@ -65,12 +82,15 @@ export class GLTF_MeshPrimitive {
 
 export class GLTF_Mesh {
   public gltf: GLTF;
+  public id: string;
   public name: string;
+  public nodeName: string = '';
   public primitives: GLTF_MeshPrimitive[] = [];
 
   constructor(gltf: GLTF, node: any) {
     this.gltf = gltf;
-    this.name = node.name || "";
+    this.name = node.name || '';
+
     for (let i = 0; i < node.primitives.length; i++) {
       this.primitives.push(new GLTF_MeshPrimitive(gltf, node.primitives[i]));
     }

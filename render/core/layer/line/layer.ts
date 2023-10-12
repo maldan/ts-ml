@@ -9,6 +9,7 @@ import { Vector3, Vector4 } from '../../../../math/linear_algebra';
 import { Triangle, Cube } from '../../../../math/geometry';
 import { Skeleton } from '../../../skeleton/skeleton';
 import { Bone } from '../../../skeleton/bone';
+import { VerletMesh } from '../../../../physics/verlet/mesh';
 
 export class LineLayer extends RenderLayer {
   private _render: Render;
@@ -68,6 +69,14 @@ export class LineLayer extends RenderLayer {
   public drawFromPoints(points: Vector3[], color: number) {
     for (let i = 0; i < points.length - 1; i++) {
       this.draw(new Line(points[i], points[i + 1], color));
+    }
+  }
+
+  public drawVerlet(verlet: VerletMesh, color: number) {
+    for (let i = 0; i < verlet.constraints.length; i++) {
+      this.draw(
+        new Line(verlet.constraints[i].from.position, verlet.constraints[i].to.position, color),
+      );
     }
   }
 

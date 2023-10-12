@@ -20,6 +20,7 @@ uniform sampler2D uBone;
 out vec3 vPosition;
 out mat3 vTBN;
 out vec2 vUV;
+out mat4 vViewMatrix;
 
 ivec2 getObjectTexelById(uint id, int ch) {
     int pixel = (int(id)*10+ch);
@@ -97,6 +98,8 @@ void main() {
     vec3 B = normalize(vec3(modelMatrix * vec4(aBiTangent, 0.0)));
     vec3 N = normalize(vec3(modelMatrix * vec4(aNormal,    0.0)));
     vTBN = mat3(T, B, N);
+
+    vViewMatrix = uViewMatrix;
 }
 
 // Fragment
@@ -109,6 +112,7 @@ precision highp sampler2D;
 in vec3 vPosition;
 in vec2 vUV;
 in mat3 vTBN;
+in mat4 vViewMatrix;
 
 out vec4 color;
 
@@ -135,10 +139,24 @@ void main()
     if (lightDot < 0.0) {
         vAmbientColor = mix(vAmbientColor, vec3(0.0, 0.0, 0.0), -lightDot);
     }
+
+    // Spec
+    vec3 lightDir = normalize(vLightDirection);
+    float specularPower = 0.5;
+    float shininess = 12.0;
+    if (lightDot < 0.0) {
+        specularPower = 0.0;
+    }
+    
+    vec3 cameraPosition = vec3(vViewMatrix[2][0], vViewMatrix[2][1], vViewMatrix[2][2]);
+    vec3 viewDir = normalize(cameraPosition - vPosition.xyz); // Вектор направления камеры
+    vec3 reflectDir = reflect(-lightDir, normal); // Вектор отражения света
+    float specular = pow(max(dot(reflectDir, viewDir), 0.0), shininess); // Спекулярное отражение света
+    vec3 specularComponent = vec3(1.0, 1.0, 1.0) * specular * specularPower; // Спекулярная составляющая цвета
     
     vec4 texelColor = texture(uTextureColor, vUV);
     vec3 lighting = vAmbientColor + (directionalLightColor * lightPower);
-    color = vec4(texelColor.rgb * lighting.rgb, 1.0);
+    color = vec4(texelColor.rgb * lighting.rgb + specularComponent.rgb, 1.0);
 }
 `;
 
@@ -203,6 +221,10 @@ uniform sampler2D uTextureNormal;
 void main()
 {
     // if (int(gl_FragCoord.y) % 2 == 0) discard;
+    vec4 texelColor = texture(uTextureColor, vUV);
+    if (texelColor.a <= 0.0) {
+        discard;
+    }
     
     // Считываем нормали из normal map
     vec3 normal = texture(uTextureNormal, vUV).xyz * 2.0 - 1.0;
@@ -220,8 +242,7 @@ void main()
         vAmbientColor = mix(vAmbientColor, vec3(0.0, 0.0, 0.0), -lightDot);
     }
     
-    vec4 texelColor = texture(uTextureColor, vUV);
     vec3 lighting = vAmbientColor + (directionalLightColor * lightPower);
-    color = vec4(texelColor.rgb * lighting.rgb, 1.0);
+    color = vec4(texelColor.rgb * lighting.rgb, texelColor.a);
 }
 `;

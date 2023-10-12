@@ -1,7 +1,10 @@
 import { Quaternion, Vector2, Vector3 } from '../../math/linear_algebra';
 import { GLTF_Mesh, GLTF_MeshPrimitive } from '../gltf/mesh';
+import { RGBA8 } from '../../color';
 
 export class Mesh {
+  public name: string = '';
+
   public position: Vector3 = new Vector3();
   public rotation: Quaternion = new Quaternion();
   public scale: Vector3 = new Vector3(1, 1, 1);
@@ -12,6 +15,9 @@ export class Mesh {
   public indices: number[] = [];
   public uv: Vector2[] = [];
   public normal: Vector3[] = [];
+  public color: RGBA8[] = [];
+
+  public isLiveUpdateVertexInGPU: boolean = false;
 
   constructor() {}
 
@@ -137,10 +143,12 @@ export class Mesh {
     return new Float32Array(out);
   }
 
-  public set(primitive: GLTF_MeshPrimitive) {
+  public set(primitive: GLTF_MeshPrimitive): Mesh {
     this.indices = Array.from(primitive.indices);
     this.vertices = Vector3.listFromArray(primitive.vertices);
     this.uv = Vector2.listFromArray(primitive.uv);
     this.normal = Vector3.listFromArray(primitive.normal);
+    this.color = RGBA8.listFromArray(primitive.color);
+    return this;
   }
 }

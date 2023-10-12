@@ -113,7 +113,11 @@ export class GLTF {
         return new GLTF_Animation(this, x);
       }) || [];
 
-    console.log(this.animations);
+    for (let i = 0; i < this.nodes.length; i++) {
+      if (this.nodes[i].meshId !== -1) {
+        this.meshes[this.nodes[i].meshId].nodeName = this.nodes[i].name;
+      }
+    }
   }
 
   get buffers(): {

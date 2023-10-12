@@ -1,20 +1,20 @@
-import type { GLTF } from "./index.js";
+import type { GLTF } from './index.js';
 
 export function numberOfComponents(t: string): number {
   switch (t) {
-    case "SCALAR":
+    case 'SCALAR':
       return 1;
-    case "VEC2":
+    case 'VEC2':
       return 2;
-    case "VEC3":
+    case 'VEC3':
       return 3;
-    case "VEC4":
+    case 'VEC4':
       return 4;
-    case "MAT2":
+    case 'MAT2':
       return 4;
-    case "MAT3":
+    case 'MAT3':
       return 9;
-    case "MAT4":
+    case 'MAT4':
       return 16;
     default:
       return 0;
@@ -55,7 +55,7 @@ export function parseAccessor(gltf: GLTF, id: number) {
   let offset = finalView.byteOffset;
   let buf = gltf.buffers[finalView.buffer].content;
 
-  if (accessor.type == "SCALAR") {
+  if (accessor.type == 'SCALAR') {
     if (accessor.componentType == TYPE_FLOAT) {
       let out = [];
       for (let i = 0; i < accessor.count; i++) {
@@ -74,28 +74,42 @@ export function parseAccessor(gltf: GLTF, id: number) {
       return new Uint32Array(out);
     }
   }
-  if (accessor.type == "VEC3") {
+  if (accessor.type == 'VEC3') {
     let out = [];
     for (let i = 0; i < accessor.count; i++) {
       out.push(
         buf.getFloat32(offset, true),
         buf.getFloat32(offset + 4, true),
-        buf.getFloat32(offset + 8, true)
+        buf.getFloat32(offset + 8, true),
       );
       offset += byteSize * componentAmount;
     }
     return new Float32Array(out);
   }
-  if (accessor.type == "VEC4") {
+  if (accessor.type == 'VEC4') {
     // Unsigned bytes
-    if (accessor.componentType == TYPE_UINT8) {
+    // console.log(accessor.componentType);
+    if (accessor.componentType == TYPE_UINT16) {
+      let out = [];
+      for (let i = 0; i < accessor.count; i++) {
+        out.push(
+          buf.getUint16(offset + 3),
+          buf.getUint16(offset + 2),
+          buf.getUint16(offset + 1),
+          buf.getUint16(offset),
+        );
+        offset += byteSize * componentAmount;
+      }
+
+      return new Uint16Array(out);
+    } else if (accessor.componentType == TYPE_UINT8) {
       let out = [];
       for (let i = 0; i < accessor.count; i++) {
         out.push(
           buf.getUint8(offset + 3),
           buf.getUint8(offset + 2),
           buf.getUint8(offset + 1),
-          buf.getUint8(offset)
+          buf.getUint8(offset),
         );
         offset += byteSize * componentAmount;
       }
@@ -108,14 +122,14 @@ export function parseAccessor(gltf: GLTF, id: number) {
           buf.getFloat32(offset, true),
           buf.getFloat32(offset + 4, true),
           buf.getFloat32(offset + 8, true),
-          buf.getFloat32(offset + 8 + 4, true)
+          buf.getFloat32(offset + 8 + 4, true),
         );
         offset += byteSize * componentAmount;
       }
       return new Float32Array(out);
     }
   }
-  if (accessor.type == "VEC2") {
+  if (accessor.type == 'VEC2') {
     let out = [];
     for (let i = 0; i < accessor.count; i++) {
       out.push(buf.getFloat32(offset, true), buf.getFloat32(offset + 4, true));
@@ -123,7 +137,7 @@ export function parseAccessor(gltf: GLTF, id: number) {
     }
     return new Float32Array(out);
   }
-  if (accessor.type == "MAT4") {
+  if (accessor.type == 'MAT4') {
     let out = [];
     for (let i = 0; i < accessor.count; i++) {
       for (let j = 0; j < 16 * 4; j += 4) {

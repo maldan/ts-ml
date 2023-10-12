@@ -58,4 +58,12 @@ export class RGBA8 {
   public static get blue() {
     return new RGBA8(0, 0, 255, 255);
   }
+
+  public static listFromArray(arr: Float32Array | number[]): RGBA8[] {
+    let out: RGBA8[] = [];
+    for (let i = 0; i < arr.length; i += 4) {
+      out.push(new RGBA8(arr[i], arr[i + 1], arr[i + 2], arr[i + 3]));
+    }
+    return out;
+  }
 }

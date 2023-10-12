@@ -17,6 +17,12 @@ export class Sphere extends Primitive {
     const distance = point.distanceTo(sphereCenter);
     const collisionOccurred = distance <= this.radius;
     if (collisionOccurred) {
+      // Есть коллизия, вычисляем вектор выталкивания
+      /*const pushVector = this.position
+        .sub(sphereCenter)
+        .normalize()
+        .scale(this.radius - distance);
+      return point.add(pushVector);*/
       // Вычисляем вектор от центра сферы до точки коллизии
       const collisionVector = point.sub(sphereCenter);
 
