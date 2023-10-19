@@ -10,6 +10,7 @@ export class Sphere extends Primitive {
 
     this.position = pos;
     this.radius = r;
+    this.calculateMatrix();
   }
 
   public pointIntersection(point: Vector3): Vector3 | null {

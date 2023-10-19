@@ -53,22 +53,31 @@ export class World {
       x.applyConstraint();
     });
 
+    this.updateHair(delta * 0.5);
+    this.updateHair(delta * 0.5);
+
+    this.checkRayCollision();
+  }
+
+  private updateHair(delta: number) {
     this.verletHairList.forEach((x) => {
       x.updatePhysics(delta);
 
       // Collision with colliders
-      x.verletMesh.points.forEach((p: VerletPoint) => {
-        this.colliderList.forEach((c) => {
-          const intersection = c.primitive.pointIntersection(p.position);
-          if (!intersection) return;
-          p.position.set(intersection);
+      x.verletRopes.forEach((rope) => {
+        rope.points.forEach((p: VerletPoint) => {
+          this.colliderList.forEach((c) => {
+            const intersection = c.primitive.pointIntersection(p.position);
+            if (!intersection) return;
+            // p.previousPosition.set(p.position);
+            p.position.set(intersection);
+            p.previousPosition.set(intersection);
+          });
         });
       });
 
       x.applyConstraint();
     });
-
-    this.checkRayCollision();
   }
 
   public checkRayCollision() {

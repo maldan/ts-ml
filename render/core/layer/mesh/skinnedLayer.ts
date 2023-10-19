@@ -43,7 +43,7 @@ export class SkinnedElement extends RenderElement {
     this.createTexture('uBone', { filtration: 'nearest', type: 'r32f', width: 64, height: 64 });
   }
 
-  updateBoneTexture() {
+  /*updateBoneTexture() {
     // Fill each bone matrix
     const pixels = new Float32Array(64 * 64);
     let id = 0;
@@ -56,10 +56,10 @@ export class SkinnedElement extends RenderElement {
     });
 
     this.updateTexture('uBone', pixels);
-  }
+  }*/
 
   render() {
-    this.updateBoneTexture();
+    // this.updateBoneTexture();
 
     this.enableAttribute('vertex', 'aPosition:vec3');
     this.enableAttribute('tangent', 'aTangent:vec3');
@@ -85,6 +85,7 @@ export class SkinnedMeshLayer extends RenderLayer {
   public scene: Scene;
   public list: SkinnedElement[] = [];
   public skeleton: Skeleton[] = [];
+  private _skeletonBonePixels: Float32Array[] = [];
 
   constructor(scene: Scene) {
     super(scene._render.gl);
@@ -99,11 +100,73 @@ export class SkinnedMeshLayer extends RenderLayer {
     this.list.push(element);
     this.skeleton.push(element.mesh.skeleton);
     this.skeleton = Array.from(new Set(this.skeleton));
+
+    // Create texture for each skeleton
+    this.createTexture('skeletonBone_' + (this.skeleton.length - 1), {
+      filtration: 'nearest',
+      type: 'r32f',
+      width: 64,
+      height: 64,
+    });
   }
 
   update(delta: number) {
-    this.skeleton.forEach((element) => {
-      element.update();
+    this.skeleton.forEach((skeleton) => {
+      skeleton.update();
+    });
+
+    // Update bone textures
+    this.skeleton.forEach((skeleton, index) => {
+      // Prepare skeleton
+      if (!this._skeletonBonePixels[index]) {
+        this._skeletonBonePixels[index] = new Float32Array(64 * 64);
+      }
+      // const pixels = new Float32Array(64 * 64);
+      let id = 0;
+      skeleton.boneList.forEach((bone) => {
+        let mx = bone.matrix.multiply(bone.inverseBindMatrix);
+        for (let i = 0; i < mx.raw.length; i++) {
+          this._skeletonBonePixels[index][id] = mx.raw[i];
+          id++;
+        }
+      });
+
+      this.updateTexture(`skeletonBone_${index}`, this._skeletonBonePixels[index]);
+    });
+
+    // Set textures to elements based on their skeleton
+    this.list.forEach((element) => {
+      const skeletonIndex = this.skeleton.indexOf(element.mesh.skeleton);
+      element.textureMap['uBone'] = this.textureMap[`skeletonBone_${skeletonIndex}`];
+      element.textureOptions['uBone'] = this.textureOptions[`skeletonBone_${skeletonIndex}`];
+    });
+  }
+
+  updateBoneTextures() {
+    // Update bone textures
+    this.skeleton.forEach((skeleton, index) => {
+      // Prepare skeleton
+      if (!this._skeletonBonePixels[index]) {
+        this._skeletonBonePixels[index] = new Float32Array(64 * 64);
+      }
+      // const pixels = new Float32Array(64 * 64);
+      let id = 0;
+      skeleton.boneList.forEach((bone) => {
+        let mx = bone.matrix.multiply(bone.inverseBindMatrix);
+        for (let i = 0; i < mx.raw.length; i++) {
+          this._skeletonBonePixels[index][id] = mx.raw[i];
+          id++;
+        }
+      });
+
+      this.updateTexture(`skeletonBone_${index}`, this._skeletonBonePixels[index]);
+    });
+
+    // Set textures to elements based on their skeleton
+    this.list.forEach((element) => {
+      const skeletonIndex = this.skeleton.indexOf(element.mesh.skeleton);
+      element.textureMap['uBone'] = this.textureMap[`skeletonBone_${skeletonIndex}`];
+      element.textureOptions['uBone'] = this.textureOptions[`skeletonBone_${skeletonIndex}`];
     });
   }
 

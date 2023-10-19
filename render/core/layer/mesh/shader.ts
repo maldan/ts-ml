@@ -20,7 +20,8 @@ uniform sampler2D uBone;
 out vec3 vPosition;
 out mat3 vTBN;
 out vec2 vUV;
-out mat4 vViewMatrix;
+//out mat4 vViewMatrix;
+out vec3 vCameraPosition;
 
 ivec2 getObjectTexelById(uint id, int ch) {
     int pixel = (int(id)*10+ch);
@@ -89,7 +90,7 @@ void main() {
     aBoneWeight.a * bone4Matrix;
     
     gl_Position = uProjectionMatrix * uViewMatrix * skinMatrix * vec4(aPosition.xyz, 1.0);
-    vPosition = (vec4(aPosition.xyz, 1.0) * skinMatrix).xyz;
+    vPosition = (skinMatrix * vec4(aPosition.xyz, 1.0)).xyz;
     vUV = aUV;
     
     // TBN Matrix
@@ -99,7 +100,13 @@ void main() {
     vec3 N = normalize(vec3(modelMatrix * vec4(aNormal,    0.0)));
     vTBN = mat3(T, B, N);
 
-    vViewMatrix = uViewMatrix;
+    vec4 cameraPosition = vec4(0.0, 0.0, 0.0, 1.0);
+    vCameraPosition = (inverse(uViewMatrix) * cameraPosition).xyz;
+    //vCameraPosition.x *= -1.0;
+    //vCameraPosition.y *= -1.0;
+    // vCameraPosition.z *= -1.0;
+    
+    // vCameraPosition = vec3(uViewMatrix[2][0], uViewMatrix[2][1], uViewMatrix[2][2]);
 }
 
 // Fragment
@@ -112,7 +119,7 @@ precision highp sampler2D;
 in vec3 vPosition;
 in vec2 vUV;
 in mat3 vTBN;
-in mat4 vViewMatrix;
+in vec3 vCameraPosition;
 
 out vec4 color;
 
@@ -122,6 +129,7 @@ uniform sampler2D uTextureNormal;
 
 void main()
 {
+    vec4 texelColor = texture(uTextureColor, vUV);
     // if (int(gl_FragCoord.y) % 2 == 0) discard;
     
     // Считываем нормали из normal map
@@ -138,25 +146,22 @@ void main()
     float lightPower = max(lightDot, 0.0);
     if (lightDot < 0.0) {
         vAmbientColor = mix(vAmbientColor, vec3(0.0, 0.0, 0.0), -lightDot);
+        vec3 lighting = vAmbientColor + (directionalLightColor * lightPower);
+        color = vec4(texelColor.rgb * lighting.rgb, 1.0);
+        return;
     }
 
     // Spec
-    vec3 lightDir = normalize(vLightDirection);
-    float specularPower = 0.5;
-    float shininess = 12.0;
-    if (lightDot < 0.0) {
-        specularPower = 0.0;
-    }
+    vec3 viewDirection = normalize(vCameraPosition - vPosition);
+    vec3 lightDirection = normalize(-vLightDirection); // Направление света
+    vec3 reflectedLight = reflect(lightDirection, normal);
+    float shininess = 28.0; // Параметр блеска (зависит от материала)
+    float specularStrength = 0.75; // Степень блеска
+    float specular = pow(max(dot(reflectedLight, viewDirection), 0.0), shininess);
+    vec3 specularColor = specularStrength * specular * vec3(1.0, 1.0, 1.0);
     
-    vec3 cameraPosition = vec3(vViewMatrix[2][0], vViewMatrix[2][1], vViewMatrix[2][2]);
-    vec3 viewDir = normalize(cameraPosition - vPosition.xyz); // Вектор направления камеры
-    vec3 reflectDir = reflect(-lightDir, normal); // Вектор отражения света
-    float specular = pow(max(dot(reflectDir, viewDir), 0.0), shininess); // Спекулярное отражение света
-    vec3 specularComponent = vec3(1.0, 1.0, 1.0) * specular * specularPower; // Спекулярная составляющая цвета
-    
-    vec4 texelColor = texture(uTextureColor, vUV);
     vec3 lighting = vAmbientColor + (directionalLightColor * lightPower);
-    color = vec4(texelColor.rgb * lighting.rgb + specularComponent.rgb, 1.0);
+    color = vec4(texelColor.rgb * lighting.rgb + specularColor.rgb, 1.0);
 }
 `;
 

@@ -4,12 +4,12 @@ import { Render } from '../../render';
 import { IEye } from '../../../type';
 import { lineShaderText } from './shader';
 import { Scene } from '../../scene';
-import { Sphere } from '../../../../math/geometry/sphere';
 import { Vector3, Vector4 } from '../../../../math/linear_algebra';
-import { Triangle, Cube } from '../../../../math/geometry';
+import { Triangle, Cube, Sphere } from '../../../../math/geometry';
 import { Skeleton } from '../../../skeleton/skeleton';
 import { Bone } from '../../../skeleton/bone';
 import { VerletMesh } from '../../../../physics/verlet/mesh';
+import { VerletRope } from '../../../../physics/verlet';
 
 export class LineLayer extends RenderLayer {
   private _render: Render;
@@ -35,12 +35,26 @@ export class LineLayer extends RenderLayer {
     );
   }
 
+  public initGrid() {
+    // Lines
+    for (let i = 0; i < 8; i++) {
+      this.add(new Line(new Vector3(i - 3.5, 0, -4), new Vector3(i - 3.5, 0, 4), 0xffffffff));
+      this.add(new Line(new Vector3(i - 3.5, 4, -4), new Vector3(i - 3.5, 4, 4), 0xffffffff));
+    }
+    for (let i = 0; i < 8; i++) {
+      this.add(new Line(new Vector3(-4, 0, i - 3.5), new Vector3(4, 0, i - 3.5), 0xffffffff));
+      this.add(new Line(new Vector3(-4, 4, i - 3.5), new Vector3(4, 4, i - 3.5), 0xffffffff));
+    }
+  }
+
   public drawBone(bone: Bone, color: number) {
     bone.children.forEach((children) => {
       this.drawTop(
         new Line(
-          new Vector4(0, 0, 0, 1).multiplyMatrix(bone.matrix).toVector3(),
-          new Vector4(0, 0, 0, 1).multiplyMatrix(children.matrix).toVector3(),
+          bone.matrix.getPosition(),
+          children.matrix.getPosition(),
+          //new Vector4(0, 0, 0, 1).multiplyMatrix(bone.matrix).toVector3(),
+          //new Vector4(0, 0, 0, 1).multiplyMatrix(children.matrix).toVector3(),
           color,
         ),
       );
@@ -72,8 +86,9 @@ export class LineLayer extends RenderLayer {
     }
   }
 
-  public drawVerlet(verlet: VerletMesh, color: number) {
+  public drawVerlet(verlet: VerletMesh | VerletRope, color: number) {
     for (let i = 0; i < verlet.constraints.length; i++) {
+      if (!verlet.constraints[i].debug.isDraw) continue;
       this.draw(
         new Line(verlet.constraints[i].from.position, verlet.constraints[i].to.position, color),
       );

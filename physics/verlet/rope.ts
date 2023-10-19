@@ -9,7 +9,9 @@ export class VerletRope {
 
   constructor(from: Vector3, to: Vector3, count: number = 1, iterations: number = 1) {
     let dir = Vector3.direction(from, to);
-    let step = dir.divScalar(count);
+    let distance = Vector3.distance(from, to);
+    let distanceStep = distance / count;
+    let step = dir.scale(distanceStep);
 
     for (let i = 0; i < count; i++) {
       if (i === 0) {

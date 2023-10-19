@@ -39,9 +39,18 @@ export class GLTF_MeshPrimitive {
     if (p === undefined) return new Float32Array([]);
     let x = parseAccessor(this.gltf, p);
     let out = [];
+
     if (x instanceof Uint16Array) {
       for (let i = 0; i < x.length; i++) {
         let c = (x[i] / 65536) * 255;
+        if (c < 0) c = 0;
+        if (c > 255) c = 255;
+        out.push(Math.round(c));
+      }
+    }
+    if (x instanceof Float32Array) {
+      for (let i = 0; i < x.length; i++) {
+        let c = x[i] * 255;
         if (c < 0) c = 0;
         if (c > 255) c = 255;
         out.push(Math.round(c));

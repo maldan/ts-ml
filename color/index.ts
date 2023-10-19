@@ -43,6 +43,10 @@ export class RGBA8 {
     return (this.r << 24) | (this.g << 16) | (this.b << 8) | this.a;
   }
 
+  public get isWhite() {
+    return this.r === 255 && this.g === 255 && this.b === 255 && this.a === 255;
+  }
+
   public static get white() {
     return new RGBA8(255, 255, 255, 255);
   }

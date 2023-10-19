@@ -1,5 +1,6 @@
 import { MMath } from '../index';
 import { Vector4 } from './vec4';
+import { Matrix4x4 } from './mat4';
 
 export class Vector3 {
   public x = 0;
@@ -176,6 +177,10 @@ export class Vector3 {
     return new Vector3(0, 1, 0);
   }
 
+  public static get down(): Vector3 {
+    return new Vector3(0, -1, 0);
+  }
+
   public static dot(v1: Vector3, v2: Vector3): number {
     return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
   }
@@ -194,5 +199,13 @@ export class Vector3 {
       out.push(new Vector3(arr[i], arr[i + 1], arr[i + 2]));
     }
     return out;
+  }
+
+  public multiplyMatrix4x4(m: Matrix4x4): Vector3 {
+    let result = new Vector3();
+    result.x = this.x * m.raw[0] + this.y * m.raw[4] + this.z * m.raw[8] + m.raw[12];
+    result.y = this.x * m.raw[1] + this.y * m.raw[5] + this.z * m.raw[9] + m.raw[13];
+    result.z = this.x * m.raw[2] + this.y * m.raw[6] + this.z * m.raw[10] + m.raw[14];
+    return result;
   }
 }

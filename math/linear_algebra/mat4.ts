@@ -378,6 +378,18 @@ export class Matrix4x4 {
     return result;
   }
 
+  public mulVector3(v: Vector3): Vector3 {
+    const result = new Array(3); // Результат - это 3D точка
+    for (let i = 0; i < 3; i++) {
+      result[i] = 0;
+      result[i] += this.raw[i * 4] * v.x;
+      result[i] += this.raw[i * 4 + 1] * v.y;
+      result[i] += this.raw[i * 4 + 2] * v.z;
+      result[i] += this.raw[i * 4 + 3]; // Учитываем смещение в четвертом столбце матрицы
+    }
+    return new Vector3(result[0], result[1], result[2]);
+  }
+
   public getPosition(): Vector3 {
     return new Vector3(this.raw[12], this.raw[13], this.raw[14]);
   }
@@ -447,6 +459,58 @@ export class Matrix4x4 {
       out.w = (sm12 - sm21) / s;
     }
 
+    return out;
+  }
+
+  public targetTo(eye: Vector3, target: Vector3, up: Vector3) {
+    let eyex = eye.x,
+      eyey = eye.y,
+      eyez = eye.z,
+      upx = up.x,
+      upy = up.y,
+      upz = up.z;
+
+    let z0 = eyex - target.x,
+      z1 = eyey - target.y,
+      z2 = eyez - target.z;
+
+    let len = z0 * z0 + z1 * z1 + z2 * z2;
+    if (len > 0) {
+      len = 1 / Math.sqrt(len);
+      z0 *= len;
+      z1 *= len;
+      z2 *= len;
+    }
+
+    let x0 = upy * z2 - upz * z1,
+      x1 = upz * z0 - upx * z2,
+      x2 = upx * z1 - upy * z0;
+
+    len = x0 * x0 + x1 * x1 + x2 * x2;
+    if (len > 0) {
+      len = 1 / Math.sqrt(len);
+      x0 *= len;
+      x1 *= len;
+      x2 *= len;
+    }
+
+    let out = new Matrix4x4();
+    out.raw[0] = x0;
+    out.raw[1] = x1;
+    out.raw[2] = x2;
+    out.raw[3] = 0;
+    out.raw[4] = z1 * x2 - z2 * x1;
+    out.raw[5] = z2 * x0 - z0 * x2;
+    out.raw[6] = z0 * x1 - z1 * x0;
+    out.raw[7] = 0;
+    out.raw[8] = z0;
+    out.raw[9] = z1;
+    out.raw[10] = z2;
+    out.raw[11] = 0;
+    out.raw[12] = eyex;
+    out.raw[13] = eyey;
+    out.raw[14] = eyez;
+    out.raw[15] = 1;
     return out;
   }
 }

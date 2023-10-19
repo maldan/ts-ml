@@ -16,6 +16,7 @@ export class Bone {
   public childrenId: number[] = [];
   public matrix = new Matrix4x4();
   public parentMatrix = new Matrix4x4();
+  public parentBone: Bone | undefined;
 
   constructor(bone: GLTF_Bone) {
     this.id = bone.id;
@@ -36,7 +37,67 @@ export class Bone {
     this.parentMatrix = parent;
 
     for (let i = 0; i < this.children.length; i++) {
+      this.children[i].parentBone = this;
       this.children[i].update(this.matrix);
     }
+  }
+
+  public updateChildren() {
+    for (let i = 0; i < this.children.length; i++) {
+      this.children[i].parentBone = this;
+      this.children[i].update(this.matrix);
+    }
+  }
+
+  /*public lookAtLocal(v: Vector3) {
+    // Вычисляем направление от текущей позиции к целевой точке
+    const target = v.sub(this.matrix.getPosition()).normalize();
+
+    // Вычисляем углы для поворота объекта
+    const pitch = Math.asin(target.y);
+    const yaw = Math.atan2(-target.x, target.z);
+
+    // Применяем повороты
+    // this.rotation.set(pitch, yaw, 0);
+    const q = Quaternion.fromEulerXYZ(pitch, yaw, 0);
+    this.rotation.set(q);
+  }*/
+
+  public lookAt(v: Vector3) {
+    // WORKS ALMOST
+    /*const target = v.sub(this.matrix.getPosition()).normalize();
+    const rr = Quaternion.lookRotation(target, this.matrix.getPosition().normalize()).toEuler();
+    rr.x += Math.PI / 2;
+    this.setWorldRotation(Quaternion.fromEuler(rr));*/
+
+    /*const mx = this.matrix.targetTo(this.matrix.getPosition(), v, Vector3.up);
+    const rr = mx.getRotation().toEuler();
+    rr.x -= Math.PI / 2;
+
+    this.position = mx.getPosition();
+    this.rotation = Quaternion.fromEuler(rr);*/
+    this.matrix = this.parentMatrix.multiply(
+      this.matrix.targetTo(this.matrix.getPosition(), v, Vector3.up),
+    );
+    this.updateChildren();
+  }
+
+  public setWorldPosition(v: Vector3) {
+    let mx = this.parentMatrix.invert();
+    this.position = v.toVector4(1.0).multiplyMatrix(mx).toVector3();
+  }
+
+  public setWorldRotation(q: Quaternion) {
+    // Умножьте инвертированный кватернион на матрицу родителя
+    let mx = this.parentMatrix.invert();
+    this.rotation = mx.rotateQuaternion(q).getRotation();
+  }
+
+  public get worldRotation() {
+    return this.matrix.getRotation();
+  }
+
+  public get worldPosition() {
+    return this.matrix.getPosition();
   }
 }

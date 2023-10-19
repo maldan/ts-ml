@@ -73,6 +73,14 @@ export class Scene extends RenderElement {
     this.layer.line.end();
   }
 
+  public addMesh(mesh: Mesh) {
+    const gl = this._render.gl;
+
+    // Create render element
+    const element = new StaticElement(gl, mesh);
+    this.layer.staticMesh.add(element);
+  }
+
   public addGLTF(scene: GLTF) {
     const gl = this._render.gl;
     const id = Math.random() + '_';

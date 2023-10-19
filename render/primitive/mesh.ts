@@ -46,8 +46,13 @@ export class Mesh {
 
       const r = 1.0 / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
 
-      const tangent = deltaPos1.scale(deltaUV2.y).sub(deltaPos2.scale(deltaUV1.y)).scale(r);
-      const biTangent = deltaPos2.scale(deltaUV1.x).sub(deltaPos1.scale(deltaUV2.x)).scale(r);
+      let a = deltaPos1.scale(deltaUV2.y);
+      let b = deltaPos2.scale(deltaUV1.x);
+      let a1 = deltaPos2.scale(deltaUV1.y);
+      let b1 = deltaPos1.scale(deltaUV2.x);
+
+      const tangent = a1.sub(a).scale(r);
+      const biTangent = b1.sub(b).scale(r);
 
       tangentList[i0] = tangent;
       tangentList[i1] = tangent;

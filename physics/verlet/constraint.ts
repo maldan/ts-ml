@@ -5,6 +5,9 @@ export class DistanceConstraint {
   public from: VerletPoint;
   public to: VerletPoint;
   public length: number;
+  public debug = {
+    isDraw: true,
+  };
 
   constructor(from: VerletPoint, to: VerletPoint, length: number = 0) {
     this.from = from;
