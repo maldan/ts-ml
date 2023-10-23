@@ -169,8 +169,16 @@ export class Vector3 {
     return new Vector3(0, 0, -1);
   }
 
+  public static get backward(): Vector3 {
+    return new Vector3(0, 0, 1);
+  }
+
   public static get right(): Vector3 {
     return new Vector3(1, 0, 0);
+  }
+
+  public static get left(): Vector3 {
+    return new Vector3(-1, 0, 0);
   }
 
   public static get up(): Vector3 {

@@ -25,7 +25,7 @@ export class PerspectiveCamera {
   }
 
   public calculateProjection() {
-    this.projectionMatrix = new Matrix4x4().perspective(
+    this.projectionMatrix = Matrix4x4.perspective(
       MMath.degToRad(this.fov),
       this.aspectRatio,
       this.near,

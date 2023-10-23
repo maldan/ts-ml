@@ -1,5 +1,6 @@
 import { Vector3 } from './vec3';
 import { Matrix4x4 } from './mat4';
+import { MMath } from '../index';
 
 export class Quaternion {
   public x = 0;
@@ -91,22 +92,6 @@ export class Quaternion {
   }
 
   public mul(q2: Quaternion): Quaternion {
-    /*let x1 = this.x;
-    let y1 = this.y;
-    let z1 = this.z;
-    let w1 = this.w;
-
-    let x2 = q2.x;
-    let y2 = q2.y;
-    let z2 = q2.z;
-    let w2 = q2.w;
-
-    return new Quaternion(
-      w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
-      w1 * y2 + y1 * w2 + z1 * x2 - x1 * z2,
-      w1 * z2 + z1 * w2 + x1 * y2 - y1 * x2,
-      w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
-    );*/
     return this.clone().mul_(q2);
   }
 
@@ -146,11 +131,12 @@ export class Quaternion {
   }
 
   public static fromEulerXYZ(x: number, y: number, z: number, unit: 'deg' | 'rad'): Quaternion {
-    if (unit === 'deg') return this.fromEuler(new Vector3(x, y, z).toRad());
-    return this.fromEuler(new Vector3(x, y, z));
+    //if (unit === 'deg') return this.fromEuler(new Vector3(x, y, z).toRad());
+    //return this.fromEuler(new Vector3(x, y, z));
+    return this.fromEuler(new Vector3(x, y, z), unit);
   }
 
-  public static fromEuler(v: Vector3): Quaternion {
+  public static fromEuler(v: Vector3, unit: 'deg' | 'rad'): Quaternion {
     /*let _x = v.x * 0.5;
     let _y = v.y * 0.5;
     let _z = v.z * 0.5;
@@ -170,9 +156,15 @@ export class Quaternion {
       c_x * c_y * c_z - s_x * s_y * s_z,
     );*/
 
-    const x = v.x;
-    const y = v.y;
-    const z = v.z;
+    let x = v.x;
+    let y = v.y;
+    let z = v.z;
+
+    if (unit === 'deg') {
+      x = MMath.degToRad(x);
+      y = MMath.degToRad(y);
+      z = MMath.degToRad(z);
+    }
 
     const qx =
       Math.sin(x / 2) * Math.cos(y / 2) * Math.cos(z / 2) -
@@ -190,7 +182,7 @@ export class Quaternion {
     return new Quaternion(qx, qy, qz, qw);
   }
 
-  public rotateEulerXYZ_(x: number, y: number, z: number, unit: 'deg' | 'rad' = 'rad') {
+  public rotateEulerXYZ_(x: number, y: number, z: number, unit: 'deg' | 'rad') {
     const r = Quaternion.fromEulerXYZ(x, y, z, unit);
     this.mul_(r);
   }
@@ -309,6 +301,7 @@ export class Quaternion {
   public static difference(a: Quaternion, b: Quaternion): Quaternion {
     return a.mul(b.invert());
   }
+
   // Функция для создания кватерниона из направления (Vector3)
   /*static fromDirection(direction: Vector3) {
     direction.normalize();
@@ -327,7 +320,7 @@ export class Quaternion {
     );
   }*/
 
-  static fromDirection(direction: Vector3, upwards: Vector3) {
+  /*static fromDirection(direction: Vector3, upwards: Vector3) {
     direction = direction.normalize();
     const right = upwards.cross(direction).normalize();
     const up = direction.cross(right);
@@ -372,10 +365,10 @@ export class Quaternion {
     }
 
     return new Quaternion(x, y, z, w);
-  }
+  }*/
 
   // Метод для создания кватерниона, который ориентирован на точку
-  public static targetTo(forward: Vector3, up: Vector3) {
+  /*public static targetTo(forward: Vector3, up: Vector3) {
     forward = forward.normalize();
 
     const dot = Vector3.dot(Vector3.forward, forward);
@@ -390,9 +383,9 @@ export class Quaternion {
     const axis = Vector3.cross(Vector3.forward, forward).normalize();
 
     return Quaternion.fromAxisAngle(axis, angle);
-  }
+  }*/
 
-  public static lookRotation(forward: Vector3, upwards: Vector3 = Vector3.up) {
+  /*public static lookRotation(forward: Vector3, upwards: Vector3 = Vector3.up) {
     // Нормализуем векторы
     // forward.normalize();
     // upwards.normalize();
@@ -425,7 +418,7 @@ export class Quaternion {
     ]);
 
     return Quaternion.fromMatrix(matrix);
-  }
+  }*/
 
   public static fromAxisAngle(axis: Vector3, angle: number) {
     // Угол в радианах разделяем пополам
@@ -473,6 +466,48 @@ export class Quaternion {
     }
 
     return new Quaternion(x, y, z, w);
+  }
+
+  public static fromDirection(forward: Vector3, upwards: Vector3 = Vector3.up) {
+    forward = forward.normalize();
+    const angle = Math.acos(forward.dot(upwards) / (forward.magnitude() * upwards.magnitude()));
+    const rotationAxis = forward.cross(upwards).normalize();
+    return Quaternion.fromAxisAngle(rotationAxis, angle);
+
+    /*forward = forward.normalize();
+    upwards = upwards.normalize();
+
+    const rotationMatrix = Matrix4x4.lookAt(forward, upwards);
+
+    // Получаем кватернион из матрицы поворота
+    return Quaternion.fromMatrix(rotationMatrix);*/
+  }
+
+  public static fromLookAt(position: Vector3, target: Vector3, upVector: Vector3): Quaternion {
+    const direction = target.sub(position).normalize();
+
+    // Проверка на нулевой вектор
+    if (direction.magnitude() === 0) {
+      return Quaternion.identity();
+    }
+
+    // Вычисляем угол между начальным вектором взгляда и целевым вектором
+    const dot = upVector.dot(direction);
+
+    if (Math.abs(dot - -1.0) < 0.000001) {
+      // Если вектора сонаправлены, используем другой вектор как "верхний"
+      upVector = new Vector3(0, 0, 1);
+    }
+
+    if (Math.abs(dot - 1.0) < 0.000001) {
+      // Если вектора противоположно направлены, объект уже смотрит в нужном направлении
+      return Quaternion.identity();
+    }
+
+    const axis = upVector.cross(direction).normalize();
+    const radians = Math.acos(dot);
+
+    return Quaternion.fromAxisAngle(axis, radians);
   }
 
   public static lerp(a: Quaternion, b: Quaternion, t: number): Quaternion {

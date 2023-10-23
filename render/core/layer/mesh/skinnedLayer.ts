@@ -124,7 +124,7 @@ export class SkinnedMeshLayer extends RenderLayer {
       // const pixels = new Float32Array(64 * 64);
       let id = 0;
       skeleton.boneList.forEach((bone) => {
-        let mx = bone.matrix.multiply(bone.inverseBindMatrix);
+        let mx = bone.matrix.mul(bone.inverseBindMatrix);
         for (let i = 0; i < mx.raw.length; i++) {
           this._skeletonBonePixels[index][id] = mx.raw[i];
           id++;
@@ -152,7 +152,7 @@ export class SkinnedMeshLayer extends RenderLayer {
       // const pixels = new Float32Array(64 * 64);
       let id = 0;
       skeleton.boneList.forEach((bone) => {
-        let mx = bone.matrix.multiply(bone.inverseBindMatrix);
+        let mx = bone.matrix.mul(bone.inverseBindMatrix);
         for (let i = 0; i < mx.raw.length; i++) {
           this._skeletonBonePixels[index][id] = mx.raw[i];
           id++;

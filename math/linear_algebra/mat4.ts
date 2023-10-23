@@ -14,6 +14,86 @@ export class Matrix4x4 {
     return new Matrix4x4(new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]));
   }
 
+  public static perspective(fov: number, aspect: number, near: number, far: number): Matrix4x4 {
+    let m = new Matrix4x4();
+    let f = 1.0 / Math.tan(fov / 2.0);
+
+    m.raw[0] = f / aspect;
+    m.raw[1] = 0;
+    m.raw[2] = 0;
+    m.raw[3] = 0;
+    m.raw[4] = 0;
+    m.raw[5] = f;
+    m.raw[6] = 0;
+    m.raw[7] = 0;
+    m.raw[8] = 0;
+    m.raw[9] = 0;
+    m.raw[11] = -1.0;
+    m.raw[12] = 0;
+    m.raw[13] = 0;
+    m.raw[15] = 0;
+
+    m.raw[10] = (far + near) / (near - far);
+    m.raw[14] = (2.0 * far * near) / (near - far);
+
+    return m;
+  }
+
+  public static lookAt(eye: Vector3, at: Vector3, up: Vector3): Matrix4x4 {
+    let zaxis = at.sub(eye).normalize();
+    let xaxis = zaxis.cross(up).normalize();
+    let yaxis = xaxis.cross(zaxis);
+
+    zaxis = zaxis.invert();
+
+    let viewMatrix = new Matrix4x4();
+    viewMatrix.raw = new Float32Array([
+      xaxis.x,
+      xaxis.y,
+      xaxis.z,
+      -xaxis.dot(eye),
+      yaxis.x,
+      yaxis.y,
+      yaxis.z,
+      -yaxis.dot(eye),
+      zaxis.x,
+      zaxis.y,
+      zaxis.z,
+      -zaxis.dot(eye),
+      0,
+      0,
+      0,
+      1,
+    ]);
+
+    return viewMatrix;
+  }
+  /*public static lookAt(forward: Vector3, upwards: Vector3): Matrix4x4 {
+    const zAxis = forward.normalize();
+    const xAxis = upwards.cross(zAxis).normalize();
+    const yAxis = zAxis.cross(xAxis);
+    const m = new Matrix4x4();
+
+    m.raw[0] = xAxis.x;
+    m.raw[1] = xAxis.y;
+    m.raw[2] = xAxis.z;
+    m.raw[3] = 0;
+    m.raw[4] = yAxis.x;
+    m.raw[5] = yAxis.y;
+    m.raw[6] = yAxis.z;
+    m.raw[7] = 0;
+    m.raw[8] = zAxis.x;
+    m.raw[9] = zAxis.y;
+    m.raw[10] = zAxis.z;
+    m.raw[11] = 0;
+    m.raw[12] = 0;
+    m.raw[13] = 0;
+    m.raw[14] = 0;
+    m.raw[15] = 1;
+
+    return m;
+  }*/
+
   public invert(): Matrix4x4 {
     let a00 = this.raw[0];
     let a01 = this.raw[1];
@@ -104,31 +184,6 @@ export class Matrix4x4 {
     return new Matrix4x4(r);
   }
 
-  public perspective(fov: number, aspect: number, near: number, far: number): Matrix4x4 {
-    let m = new Matrix4x4();
-    let f = 1.0 / Math.tan(fov / 2.0);
-
-    m.raw[0] = f / aspect;
-    m.raw[1] = 0;
-    m.raw[2] = 0;
-    m.raw[3] = 0;
-    m.raw[4] = 0;
-    m.raw[5] = f;
-    m.raw[6] = 0;
-    m.raw[7] = 0;
-    m.raw[8] = 0;
-    m.raw[9] = 0;
-    m.raw[11] = -1.0;
-    m.raw[12] = 0;
-    m.raw[13] = 0;
-    m.raw[15] = 0;
-
-    m.raw[10] = (far + near) / (near - far);
-    m.raw[14] = (2.0 * far * near) / (near - far);
-
-    return m;
-  }
-
   public transpose(): Matrix4x4 {
     const r = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
 
@@ -213,11 +268,11 @@ export class Matrix4x4 {
   }
 
   public rotateQuaternion(q: Quaternion): Matrix4x4 {
-    return this.multiply(q.toMatrix4x4());
+    return this.mul(q.toMatrix4x4());
   }
 
   public rotateQuaternion_(q: Quaternion): Matrix4x4 {
-    return this.multiply_(q.toMatrix4x4());
+    return this.mul_(q.toMatrix4x4());
   }
 
   public scale(v: Vector3): Matrix4x4 {
@@ -245,8 +300,8 @@ export class Matrix4x4 {
     return m;
   }
 
-  public multiply(b: Matrix4x4): Matrix4x4 {
-    return this.clone().multiply_(b);
+  public mul(b: Matrix4x4): Matrix4x4 {
+    return this.clone().mul_(b);
 
     /*let m = this.clone();
 
@@ -307,7 +362,7 @@ export class Matrix4x4 {
     return m;*/
   }
 
-  public multiply_(b: Matrix4x4): Matrix4x4 {
+  public mul_(b: Matrix4x4): Matrix4x4 {
     let m = this;
 
     let a00 = this.raw[0];
@@ -367,7 +422,7 @@ export class Matrix4x4 {
     return m;
   }
 
-  public multiplyVector(v: Vector4): Vector4 {
+  public mulVector4(v: Vector4): Vector4 {
     let result = new Vector4();
 
     result.x = v.x * this.raw[0] + v.y * this.raw[1] + v.z * this.raw[2] + v.w * this.raw[3];
@@ -462,55 +517,93 @@ export class Matrix4x4 {
     return out;
   }
 
-  public targetTo(eye: Vector3, target: Vector3, up: Vector3) {
-    let eyex = eye.x,
-      eyey = eye.y,
-      eyez = eye.z,
-      upx = up.x,
-      upy = up.y,
-      upz = up.z;
+  public static targetTo(eye: Vector3, target: Vector3, up: Vector3): Matrix4x4 {
+    let x0, x1, x2, y0, y1, y2, z0, z1, z2, len;
+    let eyex = eye.x;
+    let eyey = eye.y;
+    let eyez = eye.z;
+    let upx = up.x;
+    let upy = up.y;
+    let upz = up.z;
+    let centerx = target.x;
+    let centery = target.y;
+    let centerz = target.z;
 
-    let z0 = eyex - target.x,
-      z1 = eyey - target.y,
-      z2 = eyez - target.z;
-
-    let len = z0 * z0 + z1 * z1 + z2 * z2;
-    if (len > 0) {
-      len = 1 / Math.sqrt(len);
-      z0 *= len;
-      z1 *= len;
-      z2 *= len;
+    if (
+      Math.abs(eyex - centerx) < 0.000001 &&
+      Math.abs(eyey - centery) < 0.000001 &&
+      Math.abs(eyez - centerz) < 0.000001
+    ) {
+      return Matrix4x4.identity();
     }
 
-    let x0 = upy * z2 - upz * z1,
-      x1 = upz * z0 - upx * z2,
-      x2 = upx * z1 - upy * z0;
+    z0 = eyex - centerx;
+    z1 = eyey - centery;
+    z2 = eyez - centerz;
 
-    len = x0 * x0 + x1 * x1 + x2 * x2;
-    if (len > 0) {
-      len = 1 / Math.sqrt(len);
+    len = 1 / Math.sqrt(z0 * z0 + z1 * z1 + z2 * z2);
+    z0 *= len;
+    z1 *= len;
+    z2 *= len;
+
+    x0 = upy * z2 - upz * z1;
+    x1 = upz * z0 - upx * z2;
+    x2 = upx * z1 - upy * z0;
+    len = Math.sqrt(x0 * x0 + x1 * x1 + x2 * x2);
+    if (!len) {
+      x0 = 0;
+      x1 = 0;
+      x2 = 0;
+    } else {
+      len = 1 / len;
       x0 *= len;
       x1 *= len;
       x2 *= len;
     }
 
+    y0 = z1 * x2 - z2 * x1;
+    y1 = z2 * x0 - z0 * x2;
+    y2 = z0 * x1 - z1 * x0;
+
+    len = Math.sqrt(y0 * y0 + y1 * y1 + y2 * y2);
+    if (!len) {
+      y0 = 0;
+      y1 = 0;
+      y2 = 0;
+    } else {
+      len = 1 / len;
+      y0 *= len;
+      y1 *= len;
+      y2 *= len;
+    }
+
     let out = new Matrix4x4();
     out.raw[0] = x0;
-    out.raw[1] = x1;
-    out.raw[2] = x2;
+    out.raw[1] = y0;
+    out.raw[2] = z0;
     out.raw[3] = 0;
-    out.raw[4] = z1 * x2 - z2 * x1;
-    out.raw[5] = z2 * x0 - z0 * x2;
-    out.raw[6] = z0 * x1 - z1 * x0;
+    out.raw[4] = x1;
+    out.raw[5] = y1;
+    out.raw[6] = z1;
     out.raw[7] = 0;
-    out.raw[8] = z0;
-    out.raw[9] = z1;
+    out.raw[8] = x2;
+    out.raw[9] = y2;
     out.raw[10] = z2;
     out.raw[11] = 0;
-    out.raw[12] = eyex;
-    out.raw[13] = eyey;
-    out.raw[14] = eyez;
+    out.raw[12] = -(x0 * eyex + x1 * eyey + x2 * eyez);
+    out.raw[13] = -(y0 * eyex + y1 * eyey + y2 * eyez);
+    out.raw[14] = -(z0 * eyex + z1 * eyey + z2 * eyez);
     out.raw[15] = 1;
     return out;
+  }
+
+  public toString() {
+    const r = this.raw;
+    return `(
+      ${r[0]}, ${r[1]}, ${r[2]}, ${r[3]},
+      ${r[4]}, ${r[5]}, ${r[6]}, ${r[7]},
+      ${r[8]}, ${r[9]}, ${r[10]}, ${r[11]},
+      ${r[12]}, ${r[13]}, ${r[14]}, ${r[15]},
+    )`;
   }
 }

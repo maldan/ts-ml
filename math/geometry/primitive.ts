@@ -18,7 +18,7 @@ export class Primitive {
 
     if (this._parentMatrix) {
       // @ts-ignore
-      this.matrix = this.parentMatrix.multiply(this.matrix);
+      this.matrix = this.parentMatrix.mul(this.matrix);
     }
   }
 

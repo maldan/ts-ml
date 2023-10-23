@@ -33,13 +33,18 @@ export class Bone {
 
   public update(parent: Matrix4x4) {
     this.matrix.identity_().translate_(this.position).rotateQuaternion_(this.rotation);
-    this.matrix = parent.multiply(this.matrix);
+    this.matrix = parent.mul(this.matrix);
     this.parentMatrix = parent;
 
     for (let i = 0; i < this.children.length; i++) {
       this.children[i].parentBone = this;
       this.children[i].update(this.matrix);
     }
+  }
+
+  public updateMatrix() {
+    this.matrix.identity_().translate_(this.position).rotateQuaternion_(this.rotation);
+    this.matrix = this.parentMatrix.mul(this.matrix);
   }
 
   public updateChildren() {
@@ -63,7 +68,24 @@ export class Bone {
     this.rotation.set(q);
   }*/
 
-  public lookAt(v: Vector3) {
+  public trackToContrain(v: Vector3, upVector: Vector3) {
+    // Вычисляем вектор, направленный от объекта к цели
+    // let lookDirection = v.sub(this.worldPosition).normalize();
+    /*let lookDirection = Vector3.direction(this.matrix.getPosition(), v);
+
+    // Находим ось вращения, перпендикулярную `trackAxis` и `lookDirection`
+    const rotationAxis = trackAxis.clone().cross(lookDirection).normalize();
+    let rotationAngle = Math.acos(trackAxis.dot(lookDirection));
+    let qq = Quaternion.fromAxisAngle(rotationAxis, rotationAngle);
+
+    this.setWorldRotation(qq);*/
+    // let q = Matrix4x4.targetTo(v, this.worldPosition, upVector).getRotation();
+    let q = Matrix4x4.targetTo(this.worldPosition, v, upVector).getRotation();
+
+    this.setWorldRotation(q);
+  }
+
+  public lookAt(v: Vector3, up: Vector3 = Vector3.up) {
     // WORKS ALMOST
     /*const target = v.sub(this.matrix.getPosition()).normalize();
     const rr = Quaternion.lookRotation(target, this.matrix.getPosition().normalize()).toEuler();
@@ -76,10 +98,10 @@ export class Bone {
 
     this.position = mx.getPosition();
     this.rotation = Quaternion.fromEuler(rr);*/
-    this.matrix = this.parentMatrix.multiply(
-      this.matrix.targetTo(this.matrix.getPosition(), v, Vector3.up),
-    );
-    this.updateChildren();
+
+    let dir = Vector3.direction(this.matrix.getPosition(), v);
+    const q = Quaternion.fromDirection(dir, up).normalize();
+    this.setWorldRotation(q.invert());
   }
 
   public setWorldPosition(v: Vector3) {

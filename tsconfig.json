@@ -11,10 +11,11 @@
     "sourceMap": true,
     "moduleResolution": "nodenext",
     "declaration": false,
+    "esModuleInterop": true,
     "lib": [
       "dom", "es2020"
     ],
-    "baseUrl": ".",
+    "baseUrl": "."
   },
   "buildOptions": {
 

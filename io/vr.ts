@@ -85,7 +85,7 @@ export class VR_Headset {
   }
 
   public offsetRotation(dir: Vector3) {
-    this.rotationOffset = this.rotationOffset.mul(Quaternion.fromEuler(dir));
+    this.rotationOffset = this.rotationOffset.mul(Quaternion.fromEuler(dir, 'rad'));
   }
 
   public calculateOffset() {
@@ -94,7 +94,7 @@ export class VR_Headset {
       .translate(this.positionOffset.invert());
     this.offsetMatrix = offsetTransform;
 
-    this.left.viewMatrix = this.left.viewMatrix.multiply(offsetTransform);
-    this.right.viewMatrix = this.right.viewMatrix.multiply(offsetTransform);
+    this.left.viewMatrix = this.left.viewMatrix.mul(offsetTransform);
+    this.right.viewMatrix = this.right.viewMatrix.mul(offsetTransform);
   }
 }
