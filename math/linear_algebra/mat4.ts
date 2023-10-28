@@ -10,7 +10,7 @@ export class Matrix4x4 {
     else this.raw = new Float32Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
   }
 
-  public static identity(): Matrix4x4 {
+  public static get identity(): Matrix4x4 {
     return new Matrix4x4(new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]));
   }
 
@@ -486,7 +486,7 @@ export class Matrix4x4 {
 
     let trace = sm11 + sm22 + sm33;
     let s = 0.0;
-    let out = Quaternion.identity();
+    let out = Quaternion.identity;
 
     if (trace > 0.0) {
       s = Math.sqrt(trace + 1.0) * 2.0;
@@ -534,7 +534,7 @@ export class Matrix4x4 {
       Math.abs(eyey - centery) < 0.000001 &&
       Math.abs(eyez - centerz) < 0.000001
     ) {
-      return Matrix4x4.identity();
+      return Matrix4x4.identity;
     }
 
     z0 = eyex - centerx;

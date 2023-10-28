@@ -12,7 +12,7 @@ export class GLTF_Bone {
   public name: string;
   public children: number[];
   public position: Vector3 = Vector3.zero;
-  public rotation = Quaternion.identity();
+  public rotation = Quaternion.identity;
   public scale = Vector3.one;
   public inverseBindMatrix = new Matrix4x4();
 

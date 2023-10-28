@@ -1,4 +1,5 @@
 import { Matrix4x4, Quaternion, Vector3 } from '../math/linear_algebra';
+import { Complex } from '../math';
 
 test('vec3', () => {
   const v = new Vector3();
@@ -37,9 +38,17 @@ test('quaternion direction', () => {
   console.log(q.toEuler().toDeg());
 });
 
+/*
 test('matrix', () => {
   let mx = Matrix4x4.identity();
   mx = mx.targetTo(Vector3.zero, Vector3.up, Vector3.up);
   console.log(mx.getPosition(), mx.getRotation(), mx.getScale());
   console.log(mx.toString());
+});
+*/
+
+test('complex', () => {
+  let c1 = new Complex(0, 1);
+  let c2 = new Complex(0, 1);
+  console.log(c1.mul(c2));
 });

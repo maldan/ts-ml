@@ -5,7 +5,7 @@ class VR_Controller {
   public headset: VR_Headset;
   public axis: Vector2 = new Vector2();
   public trigger = false;
-  public matrix: Matrix4x4 = Matrix4x4.identity();
+  public matrix: Matrix4x4 = Matrix4x4.identity;
 
   constructor(headset: VR_Headset) {
     this.headset = headset;
@@ -13,7 +13,7 @@ class VR_Controller {
 
   public getRay(length: number): Ray {
     // From
-    let fr = Matrix4x4.identity();
+    let fr = Matrix4x4.identity;
     fr = fr.translate(this.matrix.getPosition());
     fr = fr.rotateQuaternion(this.matrix.getRotation());
     let from = fr
@@ -24,7 +24,7 @@ class VR_Controller {
       .add(this.headset.positionOffset);
 
     // To
-    fr = Matrix4x4.identity();
+    fr = Matrix4x4.identity;
     fr = fr.translate(this.matrix.getPosition());
     fr = fr.rotateQuaternion(this.matrix.getRotation());
     fr = fr.translate(new Vector3(0, 0, -length));
@@ -41,7 +41,7 @@ class VR_Controller {
 
   public get absoluteMatrix() {
     // To
-    let fr = Matrix4x4.identity();
+    let fr = Matrix4x4.identity;
     let position = this.matrix
       .getPosition()
       .toVector4(0.0)
@@ -59,8 +59,8 @@ class VR_Controller {
 class VR_Side {
   public headset: VR_Headset;
   public controller: VR_Controller;
-  public projectionMatrix: Matrix4x4 = Matrix4x4.identity();
-  public viewMatrix: Matrix4x4 = Matrix4x4.identity();
+  public projectionMatrix: Matrix4x4 = Matrix4x4.identity;
+  public viewMatrix: Matrix4x4 = Matrix4x4.identity;
 
   constructor(headset: VR_Headset) {
     this.headset = headset;
@@ -69,16 +69,16 @@ class VR_Side {
 }
 
 export class VR_Headset {
-  public headTransform: Matrix4x4 = Matrix4x4.identity();
+  public headTransform: Matrix4x4 = Matrix4x4.identity;
   public left: VR_Side = new VR_Side(this);
   public right: VR_Side = new VR_Side(this);
   public positionOffset = new Vector3();
-  public rotationOffset = Quaternion.identity();
-  public offsetMatrix = Matrix4x4.identity();
+  public rotationOffset = Quaternion.identity;
+  public offsetMatrix = Matrix4x4.identity;
 
   public offsetPosition(dir: Vector3) {
     let hh = this.rotationOffset.invert().mul(this.headTransform.getRotation());
-    let head = Matrix4x4.identity().rotateQuaternion(hh);
+    let head = Matrix4x4.identity.rotateQuaternion(hh);
 
     let dirNew = dir.toVector4(1.0).multiplyMatrix(head);
     this.positionOffset = this.positionOffset.add(dirNew.toVector3());
@@ -89,7 +89,7 @@ export class VR_Headset {
   }
 
   public calculateOffset() {
-    let offsetTransform = Matrix4x4.identity()
+    let offsetTransform = Matrix4x4.identity
       .rotateQuaternion(this.rotationOffset)
       .translate(this.positionOffset.invert());
     this.offsetMatrix = offsetTransform;

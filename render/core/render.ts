@@ -4,6 +4,7 @@ import { VR_Render } from '../vr/vr';
 import { Scene } from './scene';
 import { Slice } from '../../slice';
 import { Vector3 } from '../../math/linear_algebra';
+import { RGBA8 } from '../../color';
 
 export class RenderStats {
   public frame: number = 0;
@@ -27,6 +28,7 @@ export class Render {
   public vr: VR_Render;
   private _scene: Scene;
   public stats: RenderStats = new RenderStats();
+  public backgroundColor: RGBA8 = new RGBA8(0, 0, 0, 255);
   public onTick = (delta: number) => {};
 
   constructor(canvasId: string) {
@@ -155,7 +157,12 @@ export class Render {
 
   public clear() {
     let gl = this.gl;
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(
+      this.backgroundColor.r / 255,
+      this.backgroundColor.g / 255,
+      this.backgroundColor.b / 255,
+      this.backgroundColor.a / 255,
+    );
     gl.clearDepth(1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   }

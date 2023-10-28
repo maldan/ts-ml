@@ -2,7 +2,7 @@ export class RenderUtil {
   public static createShader(gl: WebGL2RenderingContext, main: string): WebGLProgram {
     main = main.replace(/\r\n/g, '\n');
     let shader = main.split('// Fragment\n');
-    console.log(shader);
+    // console.log(shader);
     return this.createProgram(gl, shader[0], shader[1]);
   }
 

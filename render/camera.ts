@@ -8,7 +8,7 @@ export class PerspectiveCamera {
   public near: number = 0.01;
   public far: number = 32;
   public position: Vector3 = new Vector3();
-  public rotation: Quaternion = Quaternion.identity();
+  public rotation: Quaternion = Quaternion.identity;
   public scale: Vector3 = new Vector3(1, 1, 1);
   public projectionMatrix: Matrix4x4 = new Matrix4x4();
   public viewMatrix: Matrix4x4 = new Matrix4x4();
@@ -24,6 +24,11 @@ export class PerspectiveCamera {
     this.far = far;
   }
 
+  public lookAt(target: Vector3) {
+    let m = Matrix4x4.lookAt(this.position, target, Vector3.up);
+    this.rotation = m.getRotation().invert();
+  }
+
   public calculateProjection() {
     this.projectionMatrix = Matrix4x4.perspective(
       MMath.degToRad(this.fov),
@@ -35,7 +40,7 @@ export class PerspectiveCamera {
 
   public offsetPosition(dir: Vector3) {
     let hh = this.rotation.invert();
-    let head = Matrix4x4.identity().rotateQuaternion(hh);
+    let head = Matrix4x4.identity.rotateQuaternion(hh);
 
     let dirNew = dir.toVector4(1.0).multiplyMatrix(head);
     this.position.add_(dirNew.toVector3());
@@ -50,7 +55,7 @@ export class PerspectiveCamera {
     if (this.isInversePositionZ) position.z *= -1;
 
     // Position
-    this.viewMatrix = Matrix4x4.identity()
+    this.viewMatrix = Matrix4x4.identity
       .rotateQuaternion(this.rotation)
       .translate(position)
       .scale(this.scale);

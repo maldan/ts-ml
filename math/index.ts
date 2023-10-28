@@ -8,6 +8,11 @@ export class MMath {
   }
 
   public static lerp(start: number, end: number, t: number): number {
-    return (1-t)*start + t*end
+    return (1 - t) * start + t * end;
+  }
+
+  public static remap(value: number, fromRangeStart: number, fromRangeEnd: number, toRangeStart: number, toRangeEnd: number) {
+    return ((value - fromRangeStart) * (toRangeEnd - toRangeStart)) / (fromRangeEnd - fromRangeStart) + toRangeStart;
   }
 }
+// export { Complex } from './complex';

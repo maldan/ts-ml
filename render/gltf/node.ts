@@ -10,7 +10,7 @@ export class GLTF_Node {
   public skinId: number = -1;
   public children: number[] = [];
   public position: Vector3 = Vector3.zero;
-  public rotation: Quaternion = Quaternion.identity();
+  public rotation: Quaternion = Quaternion.identity;
   public scale: Vector3 = Vector3.one;
 
   constructor(gltf: GLTF, node: any) {

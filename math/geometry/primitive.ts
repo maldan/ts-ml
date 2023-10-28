@@ -3,15 +3,15 @@ import { Ray } from './ray';
 
 export class Primitive {
   public position: Vector3 = Vector3.zero;
-  public rotation: Quaternion = Quaternion.identity();
+  public rotation: Quaternion = Quaternion.identity;
   public scale: Vector3 = Vector3.one;
-  public matrix: Matrix4x4 = Matrix4x4.identity();
+  public matrix: Matrix4x4 = Matrix4x4.identity;
   private _parentMatrix?: Matrix4x4 | (() => Matrix4x4);
 
   constructor() {}
 
   public calculateMatrix() {
-    this.matrix = Matrix4x4.identity();
+    this.matrix = Matrix4x4.identity;
     this.matrix = this.matrix.translate(this.position);
     this.matrix = this.matrix.rotateQuaternion(this.rotation);
     this.matrix = this.matrix.scale(this.scale);

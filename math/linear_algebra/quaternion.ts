@@ -22,7 +22,7 @@ export class Quaternion {
     this.w = q.w;
   }
 
-  public static identity(): Quaternion {
+  public static get identity(): Quaternion {
     return new Quaternion(0, 0, 0, 1);
   }
 
@@ -49,7 +49,7 @@ export class Quaternion {
     let wy = w * y2;
     let wz = w * z2;
 
-    let mx = Matrix4x4.identity();
+    let mx = Matrix4x4.identity;
 
     mx.raw[0] = 1.0 - (yy + zz);
     mx.raw[4] = xy - wz;
@@ -276,6 +276,10 @@ export class Quaternion {
     return new Quaternion(-this.x, -this.y, -this.z, this.w);
   }
 
+  public conjugate(): Quaternion {
+    return new Quaternion(-this.x, -this.y, -this.z, this.w);
+  }
+
   // Метод для вычисления кватерниона между двумя векторами
   public static fromTwoVectors(vectorA: Vector3, vectorB: Vector3): Quaternion {
     vectorA = vectorA.normalize();
@@ -301,71 +305,6 @@ export class Quaternion {
   public static difference(a: Quaternion, b: Quaternion): Quaternion {
     return a.mul(b.invert());
   }
-
-  // Функция для создания кватерниона из направления (Vector3)
-  /*static fromDirection(direction: Vector3) {
-    direction.normalize();
-
-    const angle = Math.acos(direction.z); // Угол между направлением и вектором (0, 0, 1)
-    const axis = new Vector3(-direction.y, direction.x, 0).normalize(); // Перпендикулярный вектор
-
-    const halfAngle = angle / 2;
-    const sinHalfAngle = Math.sin(halfAngle);
-
-    return new Quaternion(
-      axis.x * sinHalfAngle,
-      axis.y * sinHalfAngle,
-      axis.z * sinHalfAngle,
-      Math.cos(halfAngle),
-    );
-  }*/
-
-  /*static fromDirection(direction: Vector3, upwards: Vector3) {
-    direction = direction.normalize();
-    const right = upwards.cross(direction).normalize();
-    const up = direction.cross(right);
-
-    const m00 = right.x;
-    const m01 = right.y;
-    const m02 = right.z;
-    const m10 = up.x;
-    const m11 = up.y;
-    const m12 = up.z;
-    const m20 = -direction.x;
-    const m21 = -direction.y;
-    const m22 = -direction.z;
-
-    const trace = m00 + m11 + m22;
-    let x, y, z, w;
-
-    if (trace > 0) {
-      const s = 0.5 / Math.sqrt(1 + trace);
-      w = 0.25 / s;
-      x = (m21 - m12) * s;
-      y = (m02 - m20) * s;
-      z = (m10 - m01) * s;
-    } else if (m00 > m11 && m00 > m22) {
-      const s = 2 * Math.sqrt(1 + m00 - m11 - m22);
-      w = (m21 - m12) / s;
-      x = 0.25 * s;
-      y = (m01 + m10) / s;
-      z = (m02 + m20) / s;
-    } else if (m11 > m22) {
-      const s = 2 * Math.sqrt(1 + m11 - m00 - m22);
-      w = (m02 - m20) / s;
-      x = (m01 + m10) / s;
-      y = 0.25 * s;
-      z = (m12 + m21) / s;
-    } else {
-      const s = 2 * Math.sqrt(1 + m22 - m00 - m11);
-      w = (m10 - m01) / s;
-      x = (m02 + m20) / s;
-      y = (m12 + m21) / s;
-      z = 0.25 * s;
-    }
-
-    return new Quaternion(x, y, z, w);
-  }*/
 
   // Метод для создания кватерниона, который ориентирован на точку
   /*public static targetTo(forward: Vector3, up: Vector3) {
@@ -488,7 +427,7 @@ export class Quaternion {
 
     // Проверка на нулевой вектор
     if (direction.magnitude() === 0) {
-      return Quaternion.identity();
+      return Quaternion.identity;
     }
 
     // Вычисляем угол между начальным вектором взгляда и целевым вектором
@@ -501,7 +440,7 @@ export class Quaternion {
 
     if (Math.abs(dot - 1.0) < 0.000001) {
       // Если вектора противоположно направлены, объект уже смотрит в нужном направлении
-      return Quaternion.identity();
+      return Quaternion.identity;
     }
 
     const axis = upVector.cross(direction).normalize();

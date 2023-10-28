@@ -49,7 +49,7 @@ export class Skeleton {
   }
 
   public update() {
-    let mx = Matrix4x4.identity();
+    let mx = Matrix4x4.identity;
     mx.translate_(this.position);
 
     // Calculate bones with hierarchy
