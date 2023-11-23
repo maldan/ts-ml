@@ -237,7 +237,7 @@ void main()
     
     // Const
     vec3 vLightDirection = normalize(vec3(0.0, 1.0, 1.0));
-    vec3 vAmbientColor = vec3(0.3, 0.3, 0.3);
+    vec3 vAmbientColor = vec3(0.6, 0.6, 0.6);
     vec3 directionalLightColor = vec3(1.0, 1.0, 1.0);
     
     // Light

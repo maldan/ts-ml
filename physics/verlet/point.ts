@@ -1,16 +1,22 @@
 import { Vector3 } from '../../math/linear_algebra';
+import { RGB8, RGBA8 } from '../../color';
 
 export class VerletPoint {
   public position: Vector3 = new Vector3();
   public previousPosition: Vector3 = new Vector3();
+  public initPosition: Vector3 = new Vector3();
   public mass: number = 1;
   public force: Vector3 = new Vector3();
   public isStatic: boolean = false;
+  public tag: string = '';
+  public color: RGBA8 = new RGBA8(0, 0, 0, 0);
 
   constructor(p: Vector3, mass: number = 1.0) {
     this.mass = mass;
+
     this.position.set(p);
     this.previousPosition.set(p);
+    this.initPosition.set(p);
   }
 
   public update(delta: number) {

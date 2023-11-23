@@ -8,11 +8,15 @@ export class VerletMesh {
   public constraints: DistanceConstraint[] = [];
   public constraintIterations: number = 1;
 
-  constructor(mesh: Mesh, iterations: number = 1) {
+  constructor(mesh: Mesh | undefined = undefined, iterations: number = 1) {
     this.constraintIterations = iterations;
 
+    if (!mesh) return;
+
     for (let i = 0; i < mesh.vertices.length; i++) {
-      this.points.push(new VerletPoint(mesh.vertices[i]));
+      let p = new VerletPoint(mesh.vertices[i]);
+      p.color = mesh.color[i].clone();
+      this.points.push(p);
     }
     for (let i = 0; i < mesh.indices.length; i += 3) {
       this.constraints.push(

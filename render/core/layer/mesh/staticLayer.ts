@@ -98,6 +98,8 @@ export class StaticMeshLayer extends RenderLayer {
     }
 
     this.list.forEach((element) => {
+      if (!element.isVisible) return;
+
       element.currentShaderName = this.currentShaderName;
       element.render();
     });

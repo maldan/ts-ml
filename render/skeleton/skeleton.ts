@@ -8,6 +8,7 @@ export class Skeleton {
   public boneNameMap: Record<string, Bone> = {};
   public groupId: string = '';
   public position: Vector3 = Vector3.zero;
+  public rotation: Quaternion = Quaternion.identity;
 
   constructor() {}
 
@@ -51,6 +52,7 @@ export class Skeleton {
   public update() {
     let mx = Matrix4x4.identity;
     mx.translate_(this.position);
+    mx.rotateQuaternion_(this.rotation);
 
     // Calculate bones with hierarchy
     for (let i = 0; i < this.boneHierarchy.length; i++) {

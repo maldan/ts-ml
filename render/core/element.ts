@@ -29,6 +29,7 @@ export class RenderElement {
   public textureOptions: Record<string, ITextureOptions> = {};
   public gl: WebGL2RenderingContext;
   public currentShaderName: string = '';
+  public isVisible: boolean = true;
 
   constructor(gl: WebGL2RenderingContext) {
     this.gl = gl;
