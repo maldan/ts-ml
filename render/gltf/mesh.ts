@@ -1,6 +1,7 @@
 import type { GLTF } from './index.js';
 import { byteLength, numberOfComponents, parseAccessor } from './util.js';
 import type { GLTF_Material } from './material.js';
+import { Vector3 } from '../../math/linear_algebra';
 
 export class GLTF_MeshPrimitive {
   public gltf: GLTF;
@@ -15,9 +16,12 @@ export class GLTF_MeshPrimitive {
   public indicesId: number;
   public materialId: number;
 
+  public targets: { POSITION: number; NORMAL: number }[] = [];
+
   constructor(gltf: GLTF, node: any) {
     this.gltf = gltf;
     this.attributes = node.attributes;
+    this.targets = node.targets || [];
     this.indicesId = node.indices;
     this.materialId = node.material;
   }
@@ -87,6 +91,18 @@ export class GLTF_MeshPrimitive {
   get material(): GLTF_Material {
     return this.gltf.materials[this.materialId];
   }
+
+  public targetVertices(id: number): Float32Array {
+    let p = this.targets[id].POSITION;
+    if (p === undefined) return new Float32Array([]);
+    return parseAccessor(this.gltf, p) as Float32Array;
+  }
+
+  public targetNormals(id: number): Float32Array {
+    let p = this.targets[id].NORMAL;
+    if (p === undefined) return new Float32Array([]);
+    return parseAccessor(this.gltf, p) as Float32Array;
+  }
 }
 
 export class GLTF_Mesh {
@@ -95,10 +111,14 @@ export class GLTF_Mesh {
   public name: string;
   public nodeName: string = '';
   public primitives: GLTF_MeshPrimitive[] = [];
+  public extras: { targetNames: string[] } = {};
+  public weights: number[] = [];
 
   constructor(gltf: GLTF, node: any) {
     this.gltf = gltf;
     this.name = node.name || '';
+    this.extras = node.extras;
+    this.weights = node.weights;
 
     for (let i = 0; i < node.primitives.length; i++) {
       this.primitives.push(new GLTF_MeshPrimitive(gltf, node.primitives[i]));

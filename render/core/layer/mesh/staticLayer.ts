@@ -7,9 +7,16 @@ import { skinnedMeshShaderText, staticMeshShaderText } from './shader';
 import { IEye } from '../../../type';
 import { Mesh } from '../../../primitive/mesh';
 import { SkinnedElement } from './skinnedLayer';
+import { Matrix4x4, Quaternion, Vector3 } from '../../../../math/linear_algebra';
 
 export class StaticElement extends RenderElement {
   public mesh: Mesh;
+
+  private _position: Vector3 = new Vector3();
+  private _rotation: Quaternion = new Quaternion();
+  private _scale: Vector3 = new Vector3(1, 1, 1);
+  private _modelMatrix: Matrix4x4 = Matrix4x4.identity;
+  private _parentMatrix: Matrix4x4 | (() => Matrix4x4) | undefined = undefined;
 
   constructor(gl: WebGL2RenderingContext, mesh: Mesh) {
     super(gl);
@@ -26,8 +33,30 @@ export class StaticElement extends RenderElement {
     this.uploadBuffer('normal', this.mesh.plainNormal);
     this.uploadBuffer('uv', this.mesh.plainUV);
 
-    this.createTexture('uTextureColor', { filtration: 'linear', useMapMaps: true });
-    this.createTexture('uTextureNormal', { filtration: 'linear', useMapMaps: true });
+    this.createTexture('uTextureColor', { filtration: 'linear', useMapMaps: true, wrap: 'repeat' });
+    this.createTexture('uTextureNormal', {
+      filtration: 'linear',
+      useMapMaps: true,
+      wrap: 'repeat',
+    });
+  }
+
+  public get matrix() {
+    return this._modelMatrix;
+  }
+
+  public set parentMatrix(m: Matrix4x4 | (() => Matrix4x4) | undefined) {
+    this._parentMatrix = m;
+  }
+
+  public get parentMatrix(): Matrix4x4 | undefined {
+    if (this._parentMatrix instanceof Matrix4x4) {
+      return this._parentMatrix;
+    }
+    if (this._parentMatrix instanceof Function) {
+      return this._parentMatrix();
+    }
+    return undefined;
   }
 
   render() {
@@ -49,8 +78,45 @@ export class StaticElement extends RenderElement {
     this.activateTexture('uTextureColor', 0);
     this.activateTexture('uTextureNormal', 1);
 
+    this.bindMatrix('uModelMatrix', this._modelMatrix.raw);
+
     // Draw
     this.drawElements(this.mesh.indices.length);
+  }
+
+  public calculateModelMatrix() {
+    this._modelMatrix
+      .identity_()
+      .translate_(this._position)
+      .rotateQuaternion_(this._rotation)
+      .scale_(this._scale);
+
+    if (this.parentMatrix) {
+      // @ts-ignore
+      this._modelMatrix = this.parentMatrix.mul(this._modelMatrix);
+    }
+  }
+
+  public set position(v: Vector3) {
+    this._position = v;
+    this.calculateModelMatrix();
+  }
+  public set rotation(v: Quaternion) {
+    this._rotation = v;
+    this.calculateModelMatrix();
+  }
+  public set scale(v: Vector3) {
+    this._scale = v;
+    this.calculateModelMatrix();
+  }
+  public get position() {
+    return this._position;
+  }
+  public get rotation() {
+    return this._rotation;
+  }
+  public get scale() {
+    return this._scale;
   }
 }
 

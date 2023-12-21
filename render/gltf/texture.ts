@@ -1,5 +1,5 @@
-import type { GLTF } from "./index";
-import { GLTF_Image } from "./image";
+import type { GLTF } from './index';
+import { GLTF_Image } from './image';
 
 export class GLTF_Texture {
   public gltf: GLTF;
@@ -10,9 +10,20 @@ export class GLTF_Texture {
     this.gltf = gltf;
     this.sampler = texture.sampler;
     this.source = texture.source;
+
+    // Webp hack
+    if (texture.extensions) {
+      if (texture.extensions.EXT_texture_webp) {
+        this.source = texture.extensions.EXT_texture_webp.source;
+      }
+    }
   }
 
   get image(): GLTF_Image {
     return this.gltf.images[this.source];
+  }
+
+  get minFilter(): number {
+    return;
   }
 }

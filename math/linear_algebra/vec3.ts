@@ -209,6 +209,10 @@ export class Vector3 {
     return out;
   }
 
+  public static between(v1: Vector3, v2: Vector3): Vector3 {
+    return v1.add(v2).divScalar(2);
+  }
+
   public multiplyMatrix4x4(m: Matrix4x4): Vector3 {
     let result = new Vector3();
     result.x = this.x * m.raw[0] + this.y * m.raw[4] + this.z * m.raw[8] + m.raw[12];

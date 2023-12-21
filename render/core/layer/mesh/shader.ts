@@ -180,6 +180,7 @@ in vec2 aUV;
 
 uniform mat4 uProjectionMatrix;
 uniform mat4 uViewMatrix;
+uniform mat4 uModelMatrix;
 
 out vec3 vPosition;
 out mat3 vTBN;
@@ -195,12 +196,12 @@ mat4 identity() {
 }
 
 void main() {
-    gl_Position = uProjectionMatrix * uViewMatrix * vec4(aPosition.xyz, 1.0);
+    gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aPosition.xyz, 1.0);
     vPosition = (vec4(aPosition.xyz, 1.0)).xyz;
     vUV = aUV;
     
     // TBN Matrix
-    mat4 modelMatrix = identity();
+    mat4 modelMatrix = uModelMatrix;
     vec3 T = normalize(vec3(modelMatrix * vec4(aTangent,   1.0)));
     vec3 B = normalize(vec3(modelMatrix * vec4(aBiTangent, 1.0)));
     vec3 N = normalize(vec3(modelMatrix * vec4(aNormal,    1.0)));

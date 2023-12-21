@@ -5,10 +5,11 @@ import { RGBA8 } from '../../color';
 export class Mesh {
   public name: string = '';
 
-  public position: Vector3 = new Vector3();
-  public rotation: Quaternion = new Quaternion();
-  public scale: Vector3 = new Vector3(1, 1, 1);
+  //public position: Vector3 = new Vector3();
+  //public rotation: Quaternion = new Quaternion();
+  //public scale: Vector3 = new Vector3(1, 1, 1);
 
+  private _originalVertices: Vector3[] = [];
   public vertices: Vector3[] = [];
   public tangent: Vector3[] = [];
   public biTangent: Vector3[] = [];
@@ -16,8 +17,17 @@ export class Mesh {
   public uv: Vector2[] = [];
   public normal: Vector3[] = [];
   public color: RGBA8[] = [];
+  public targets: Record<string, Vector3[]> = {};
+  public targetsWeight: Record<string, number> = {};
 
   public isLiveUpdateVertexInGPU: boolean = false;
+  public updateInGPU = {
+    vertices: false,
+  };
+
+  private _plain = {
+    vertices: new Float32Array([]),
+  };
 
   constructor() {}
 
@@ -100,12 +110,54 @@ export class Mesh {
     */
   }
 
+  public addTarget(name: string, vertices: Float32Array) {
+    let v = [];
+    for (let i = 0; i < vertices.length; i += 3) {
+      v.push(new Vector3(vertices[i], vertices[i + 1], vertices[i + 1]));
+    }
+    this.targets[name] = v;
+    this.targetsWeight[name] = 0;
+
+    // First time create copy of original mesh
+    if (this._originalVertices.length === 0) {
+      for (let i = 0; i < this.vertices.length; i++) {
+        this._originalVertices.push(this.vertices[i].clone());
+      }
+    }
+  }
+
+  public setTargetWeight(name: string, value: number) {
+    this.targetsWeight[name] = value;
+
+    this.calculateTarget();
+  }
+
+  public calculateTarget() {
+    for (let i = 0; i < this._originalVertices.length; i++) {
+      let allInfluences = [];
+      for (let key in this.targetsWeight) {
+        if (this.targetsWeight[key] !== 0) {
+          allInfluences.push(this.targets[key][i].scale(this.targetsWeight[key]));
+        }
+      }
+
+      let finalVector = this._originalVertices[i];
+      for (let j = 0; j < allInfluences.length; j++) {
+        finalVector = finalVector.add(allInfluences[j]);
+      }
+      this.vertices[i] = finalVector;
+    }
+
+    this.updateInGPU.vertices = true;
+  }
+
   public get plainVertices(): Float32Array {
     const out = [];
     for (let i = 0; i < this.vertices.length; i++) {
       out.push(this.vertices[i].x, this.vertices[i].y, this.vertices[i].z);
     }
     return new Float32Array(out);
+    //return this._plain.vertices;
   }
 
   public get plainTangent(): Float32Array {
@@ -154,6 +206,13 @@ export class Mesh {
     this.uv = Vector2.listFromArray(primitive.uv);
     this.normal = Vector3.listFromArray(primitive.normal);
     this.color = RGBA8.listFromArray(primitive.color);
+
+    const plainVertices = [];
+    for (let i = 0; i < this.vertices.length; i++) {
+      plainVertices.push(this.vertices[i].x, this.vertices[i].y, this.vertices[i].z);
+    }
+    this._plain.vertices = new Float32Array(plainVertices);
+
     return this;
   }
 }

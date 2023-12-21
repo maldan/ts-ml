@@ -1,8 +1,8 @@
 import { RenderUtil } from './util';
 
 type ITextureOptions = {
-  filtration: string;
-  wrap: string;
+  filtration: 'nearest' | 'linear';
+  wrap: 'clamp' | 'repeat' | 'mirror';
   type: string;
   width: number;
   height: number;
@@ -48,7 +48,7 @@ export class RenderElement {
     if (!options) {
       options = {
         filtration: 'linear',
-        wrap: 'clamp',
+        wrap: 'repeat',
         type: 'rgba8',
         width: 1,
         height: 1,

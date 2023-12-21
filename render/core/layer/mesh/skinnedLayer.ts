@@ -59,6 +59,12 @@ export class SkinnedElement extends RenderElement {
   }*/
 
   render() {
+    if (this.mesh.updateInGPU) {
+      if (this.mesh.updateInGPU.vertices) {
+        this.uploadBuffer('vertex', this.mesh.plainVertices);
+        this.mesh.updateInGPU.vertices = false;
+      }
+    }
     // this.updateBoneTexture();
 
     this.enableAttribute('vertex', 'aPosition:vec3');
@@ -194,6 +200,7 @@ export class SkinnedMeshLayer extends RenderLayer {
     }
 
     this.list.forEach((element) => {
+      if (!element.isVisible) return;
       element.currentShaderName = this.currentShaderName;
       element.render();
     });

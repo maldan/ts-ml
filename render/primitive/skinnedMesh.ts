@@ -39,5 +39,6 @@ export class SkinnedMesh extends Mesh {
 
     this.boneWeight = Vector4.listFromArray(primitive.boneWeight);
     this.boneIndex = Array.from(primitive.boneIndex);
+    return this;
   }
 }

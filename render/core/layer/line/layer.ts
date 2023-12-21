@@ -86,7 +86,17 @@ export class LineLayer extends RenderLayer {
     }
   }
 
-  public drawVerlet(verlet: VerletMesh | VerletRope, color: number, staticColor?: number) {
+  public drawVerlet(args: {
+    verlet: VerletMesh | VerletRope;
+    color: number;
+    staticColor?: number;
+    isTop?: boolean;
+  }) {
+    let draw = args.isTop ? this.drawTop.bind(this) : this.draw.bind(this);
+    let verlet = args.verlet;
+    let staticColor = args.staticColor;
+    let color = args.color;
+
     if (staticColor === undefined) staticColor = color;
 
     for (let i = 0; i < verlet.constraints.length; i++) {
@@ -94,7 +104,7 @@ export class LineLayer extends RenderLayer {
 
       // From static to static
       if (verlet.constraints[i].from.isStatic && verlet.constraints[i].to.isStatic) {
-        this.draw(
+        draw(
           new Line(
             verlet.constraints[i].from.position,
             verlet.constraints[i].to.position,
@@ -106,7 +116,7 @@ export class LineLayer extends RenderLayer {
       }
 
       if (!verlet.constraints[i].from.isStatic && verlet.constraints[i].to.isStatic) {
-        this.draw(
+        draw(
           new Line(
             verlet.constraints[i].from.position,
             verlet.constraints[i].to.position,
@@ -118,7 +128,7 @@ export class LineLayer extends RenderLayer {
       }
 
       if (verlet.constraints[i].from.isStatic && !verlet.constraints[i].to.isStatic) {
-        this.draw(
+        draw(
           new Line(
             verlet.constraints[i].from.position,
             verlet.constraints[i].to.position,
@@ -129,7 +139,7 @@ export class LineLayer extends RenderLayer {
         continue;
       }
 
-      this.draw(
+      draw(
         new Line(
           verlet.constraints[i].from.position,
           verlet.constraints[i].to.position,

@@ -89,12 +89,17 @@ export class Scene extends RenderElement {
     if (scene.textures) {
       for (let i = 0; i < scene.textures.length; i++) {
         const name = `${id}_${scene.textures[i].source}`;
-        this.createTexture(name, { filtration: 'linear', useMapMaps: true });
-        this.uploadImageInTexture(name, scene.textures[i].image.image);
+        this.createTexture(name, { filtration: 'linear', useMapMaps: true, wrap: 'repeat' });
+
+        try {
+          this.uploadImageInTexture(name, scene.textures[i].image.image);
+        } catch (e) {
+          console.error(e);
+        }
       }
     } else {
       const name = `${id}_0`;
-      this.createTexture(name, { filtration: 'linear', useMapMaps: true });
+      this.createTexture(name, { filtration: 'linear', useMapMaps: true, wrap: 'repeat' });
     }
 
     // Parse skins
@@ -111,6 +116,10 @@ export class Scene extends RenderElement {
           skinnedMesh.skeleton = skeleton;
           skinnedMesh.name = mesh.nodeName;
           skinnedMesh.set(primitive);
+
+          primitive.targets.forEach((target, index) => {
+            skinnedMesh.addTarget(mesh.extras.targetNames[index], primitive.targetVertices(index));
+          });
 
           // Create render element
           const element = new SkinnedElement(gl, skinnedMesh);
@@ -141,6 +150,13 @@ export class Scene extends RenderElement {
 
           // Create render element
           const element = new StaticElement(gl, staticMesh);
+          element.position = scene.nodes[i].position;
+          element.rotation = scene.nodes[i].rotation;
+          element.scale = scene.nodes[i].scale;
+          element['__id'] = scene.nodes[i].id;
+          element['__children'] = scene.nodes[i].children;
+
+          // console.log(scene.nodes[i].children);
 
           // Assign textures
           try {
@@ -156,6 +172,22 @@ export class Scene extends RenderElement {
         });
       }
     }
+
+    // Set childrens
+    this.layer.staticMesh.list.forEach((x) => {
+      if (x['__children']?.length > 0) {
+        let children = x['__children'];
+        children.forEach((id) => {
+          let y = this.layer.staticMesh.list.find((xx) => xx['__id'] === id);
+          if (!y) return;
+          y.parentMatrix = () => {
+            return x.matrix;
+          };
+          y.calculateModelMatrix();
+          x.calculateModelMatrix();
+        });
+      }
+    });
 
     // Patch animations
     scene.animations.forEach((x) => {

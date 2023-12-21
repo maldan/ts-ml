@@ -8,6 +8,7 @@ export class VerletPoint {
   public mass: number = 1;
   public force: Vector3 = new Vector3();
   public isStatic: boolean = false;
+  public name: string = '';
   public tag: string = '';
   public color: RGBA8 = new RGBA8(0, 0, 0, 0);
 

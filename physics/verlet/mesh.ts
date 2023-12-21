@@ -1,11 +1,11 @@
 import { VerletPoint } from './point';
-import { DistanceConstraint } from './constraint';
+import { DistanceConstraint, IConstrain, SoftDistanceConstraint } from './constraint';
 import { Mesh } from '../../render/primitive/mesh';
 import { Vector3 } from '../../math/linear_algebra';
 
 export class VerletMesh {
   public points: VerletPoint[] = [];
-  public constraints: DistanceConstraint[] = [];
+  public constraints: IConstrain[] = [];
   public constraintIterations: number = 1;
 
   constructor(mesh: Mesh | undefined = undefined, iterations: number = 1) {
